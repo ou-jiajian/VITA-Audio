@@ -7,7 +7,7 @@ import sys
 from vita_audio.tokenizer import get_audio_tokenizer
 from vita_audio.data.processor.audio_processor import add_audio_input_contiguous
 
-from vita_audio.models import Qwen2MTPSenseVoiceForCausalLM
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer, AutoConfig
 from transformers.generation import GenerationConfig
 
@@ -341,7 +341,7 @@ def main():
     # print(f"{tokenizer.get_chat_template()=}")
 
 
-    model = Qwen2MTPSenseVoiceForCausalLM.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         model_name_or_path,
         trust_remote_code=True,
         device_map=device_map,
