@@ -62,7 +62,25 @@ Model inference speed under different inference modes.
 
 
 
-https://github.com/user-attachments/assets/d3da7129-168f-4c07-9c13-a319eda0c276
+
+https://github.com/user-attachments/assets/38da791f-5d72-4d9c-a9b2-cec97c2f2b2b
+
+
+
+---
+
+> To be or not to be--to live intensely and richly,
+> merely to exist, that depends on ourselves. Let widen and intensify our relations.
+> While we live, let live!
+
+
+
+
+https://github.com/user-attachments/assets/fd478065-4041-4eb8-b331-0c03b304d853
+
+
+
+
 
 ---
 ## 🔔 Models
