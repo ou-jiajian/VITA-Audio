@@ -76,12 +76,12 @@
 
 ## Requirements and Installation
 
-Prepare Environment
+### Prepare Environment
 ```
 docker pull shenyunhang/pytorch:24.11-py3_2024-1224
 ```
 
-Get the Code
+### Get the Code
 ```
 git clone https://github.com/VITA-MLLM/VITA-Audio.git
 cd VITA-Audio
@@ -91,11 +91,13 @@ pip install -e .
 
 ### Prepare Pre-trained Weight
 
-### LLM
+#### LLM
+
 - Download the LLM from https://huggingface.co/Qwen/Qwen2.5-7B-Instruct.
 - Put it into '../models/Qwen/Qwen2.5-7B-Instruct/'
 
-### Audio Encoder and Audio Decoder
+#### Audio Encoder and Audio Decoder
+
 - Download the Audio Encoder from https://huggingface.co/THUDM/glm-4-voice-tokenizer.
 - Put it into '../models/THUDM/glm-4-voice-tokenizer'
 
@@ -104,7 +106,6 @@ pip install -e .
 
 
 ## Training
-
 
 The following tutorial will take `VITA-Audio-Boost` as an example.
 
