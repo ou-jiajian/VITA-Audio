@@ -9,7 +9,6 @@
     <a href="https://huggingface.co/collections/VITA-MLLM/vita-audio-680f036c174441e7cdf02575" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-ffc107?color=ffc107&logoColor=white" /></a>
  </p>
 
-https://github.com/user-attachments/assets/0de5e8f6-7cb9-479f-bcad-5c04931748e9
 
 ## :fire: News
 
@@ -37,6 +36,9 @@ https://github.com/user-attachments/assets/0de5e8f6-7cb9-479f-bcad-5c04931748e9
 
 
 
+<p align="center">
+  <img src="./asset/qa_speed.gif" alt="demogif" width="600">
+</p>
 
 
 
