@@ -16,34 +16,28 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from transformers.generation import GenerationConfig
 
 import torchaudio
+from vita_audio.data.processor.audio_processor import add_audio_input_contiguous
 from vita_audio.tokenizer import get_audio_tokenizer
 
 
-def collate_fn(batches, tokenizer, add_generation_prompt):
+def collate_fn(batches):
+    input_ids = [sample["input_ids"] for sample in batches]
+    audios = [sample["audios"] for sample in batches]
+    audio_indices = [sample["audio_indices"] for sample in batches]
 
-    messages = [sample["messages"] for sample in batches]
     refs = [sample["ref"] for sample in batches]
     filenames = [sample["filename"] for sample in batches]
 
-    # input_ids = tokenizer(questions, return_tensors='pt', padding='longest')
-    input_ids = [
-        tokenizer.apply_chat_template(
-            sample["messages"],
-            tokenize=True,
-            add_generation_prompt=add_generation_prompt,
-            return_tensors="pt",
-        )
-        for sample in batches
-    ]
-    input_ids = torch.cat(input_ids, dim=0)
-
-    return messages, refs, filenames, input_ids
+    return input_ids, audios, audio_indices, refs, filenames
 
 
 class STSDataset(torch.utils.data.Dataset):
-    def __init__(self, json_path, audio_tokenizer, default_system_message=None):
+    def __init__(self, json_path, tokenizer, audio_tokenizer, default_system_message=None, add_generation_prompt=True):
         data = load_dataset("json", data_files=json_path, keep_in_memory=False)
         self.data = data["train"]
+
+        self.tokenizer = tokenizer
+        self.add_generation_prompt = add_generation_prompt
 
         self.audio_tokenizer = audio_tokenizer
         self.default_system_message = default_system_message
@@ -57,8 +51,13 @@ class STSDataset(torch.utils.data.Dataset):
         assert len(sample["audios"]) == 1
 
         audio_path = sample["audios"][0]
-        audio_tokens = self.audio_tokenizer.encode(audio_path)
-        audio_tokens = "".join(f"<|audio_{i}|>" for i in audio_tokens)
+
+        if self.audio_tokenizer.apply_to_role("user", is_discrete=True):
+            # discrete codec
+            audio_tokens = self.audio_tokenizer.encode(audio_path)
+            audio_tokens = "".join(f"<|audio_{i}|>" for i in audio_tokens)
+        else:
+            audio_tokens = None
 
         messages = []
 
@@ -88,25 +87,41 @@ class STSDataset(torch.utils.data.Dataset):
                 assert len(content) == 1
                 content = content[0]
 
-            content = content.replace(
-                "<audio>", f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>"
-            )
-            content = content.replace(
-                "<|audio|>", f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>"
-            )
+            if audio_tokens is not None:
+                content = content.replace(
+                    "<|audio|>", f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>"
+                )
 
             new_conv["content"] = content
             messages.append(new_conv)
 
+        input_ids = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=True,
+            add_generation_prompt=self.add_generation_prompt,
+            # return_tensors="pt",
+        )
+
         ref = sample["messages"][-1]["content"]
+
+        if self.audio_tokenizer.apply_to_role("user", is_contiguous=True):
+            # contiguous codec
+            input_ids, audios, audio_indices = add_audio_input_contiguous(
+                input_ids, [audio_path], self.tokenizer, self.audio_tokenizer
+            )
+        else:
+            audios = None
+            audio_indices = None
+
+        input_ids = torch.tensor([input_ids], dtype=torch.long)
 
         filename = os.path.basename(audio_path)
         filename = os.path.splitext(filename)[0]
 
-        # print(f"messages {messages}")
-        # print(f"ref {ref}")
         return {
-            "messages": messages,
+            "input_ids": input_ids,
+            "audios": audios,
+            "audio_indices": audio_indices,
             "ref": ref,
             "filename": filename,
         }
@@ -143,26 +158,30 @@ def inference(model, tokenizer, audio_tokenizer, dataloader, output_dir, asr_mod
 
     outputs = []
 
-    for _, (messages, refs, filenames, input_ids) in enumerate(tqdm.tqdm(dataloader)):
+    for _, (batched_input_ids, batched_audios, batched_audio_indices, batched_ref, batched_filename) in enumerate(
+        tqdm.tqdm(dataloader)
+    ):
+        for input_ids, audios, audio_indices, ref, filename in zip(
+            batched_input_ids, batched_audios, batched_audio_indices, batched_ref, batched_filename
+        ):
 
-        responses = model.generate(
-            input_ids=input_ids.cuda(),
-            # temperature=0.2,
-            # top_p=0.8,
-            # do_sample=False,
-            # temperature=1.0,
-            max_new_tokens=1024,
-            min_new_tokens=1,
-        )
-        # hyps = [
-        #     tokenizer.decode(x[len(y):].cpu(), skip_special_tokens=True)
-        #     for x, y in zip(responses, input_ids)
-        # ]
+            responses = model.generate(
+                input_ids=input_ids.cuda(),
+                audios=audios,
+                audio_indices=audio_indices,
+                # temperature=0.2,
+                # top_p=0.8,
+                # do_sample=False,
+                # temperature=1.0,
+                max_new_tokens=1024,
+                min_new_tokens=1,
+            )
 
-        for response, ref, filename, input_id in zip(responses, refs, filenames, input_ids):
+            response = responses[0][len(input_ids[0]) :]
+
             text_tokens = []
             audio_tokens = []
-            for token_id in response[len(input_id) :]:
+            for token_id in response:
                 if token_id >= audio_offset:
                     audio_tokens.append(token_id - audio_offset)
                 else:
@@ -188,8 +207,6 @@ def inference(model, tokenizer, audio_tokenizer, dataloader, output_dir, asr_mod
 
             print("")
             print("=" * 100)
-            # print(f"{len(input_id)=}")
-            # print(f"{len(response)=}")
             print(f"{tokenizer.decode(response, skip_special_tokens=False)}")
             print(f"  {hyp_text=}")
             print(f"{hyp_speech=}")
@@ -202,7 +219,6 @@ def inference(model, tokenizer, audio_tokenizer, dataloader, output_dir, asr_mod
 def load_asr_model():
     import torch
     from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-    from datasets import load_dataset
 
     rank = torch.distributed.get_rank()
     device = f"cuda:{rank}"
@@ -225,12 +241,6 @@ def load_asr_model():
         torch_dtype=torch_dtype,
         device=device,
     )
-
-    # dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
-    # sample = dataset[0]["audio"]
-
-    # result = pipe(sample)
-    # print(result["text"])
 
     return pipe
 
@@ -364,17 +374,16 @@ if __name__ == "__main__":
     if model.config.model_type == "hunyuan":
         model.generation_config.eos_token_id = tokenizer.eos_id
 
-    import whisper
-
-    # asr_model = whisper.load_model("large-v2",  download_root="/data_2/jarvielong/speech_qa_set/whisper", device="cuda")
     asr_model = load_asr_model()
 
     # ================================================================
     print("Loading data")
     dataset = STSDataset(
         json_path=args.json_path,
+        tokenizer=tokenizer,
         audio_tokenizer=audio_tokenizer,
         default_system_message=default_system_message,
+        add_generation_prompt=add_generation_prompt,
     )
 
     dataloader = torch.utils.data.DataLoader(
@@ -385,7 +394,7 @@ if __name__ == "__main__":
         pin_memory=True,
         drop_last=False,
         collate_fn=partial(
-            collate_fn, tokenizer=tokenizer, add_generation_prompt=add_generation_prompt
+            collate_fn,
         ),
     )
 

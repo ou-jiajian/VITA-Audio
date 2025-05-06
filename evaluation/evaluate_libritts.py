@@ -21,34 +21,24 @@ import torchaudio
 from vita_audio.tokenizer import get_audio_tokenizer
 
 
-def collate_fn(batches, tokenizer, add_generation_prompt):
+def collate_fn(batches):
+    input_ids = [sample["input_ids"] for sample in batches]
 
-    messages = [sample["messages"] for sample in batches]
     refs = [sample["ref"] for sample in batches]
     filenames = [sample["filename"] for sample in batches]
 
-    # input_ids = tokenizer(questions, return_tensors='pt', padding='longest')
-    input_ids = [
-        tokenizer.apply_chat_template(
-            sample["messages"],
-            tokenize=True,
-            add_generation_prompt=add_generation_prompt,
-            return_tensors="pt",
-        )
-        for sample in batches
-    ]
-    input_ids = torch.cat(input_ids, dim=0)
-
-    return messages, refs, filenames, input_ids
+    return input_ids, refs, filenames
 
 
 class TTSDataset(torch.utils.data.Dataset):
-    def __init__(self, json_path, audio_tokenizer, default_system_message=None):
+    def __init__(self, json_path, tokenizer, audio_tokenizer, default_system_message=None, add_generation_prompt=True):
         data = load_dataset("json", data_files=json_path, keep_in_memory=False)
         self.data = data["train"]
 
+        self.tokenizer = tokenizer
         self.audio_tokenizer = audio_tokenizer
         self.default_system_message = default_system_message
+        self.add_generation_prompt = add_generation_prompt
 
     def __len__(self):
         return len(self.data)
@@ -70,6 +60,13 @@ class TTSDataset(torch.utils.data.Dataset):
             }
         )
 
+        input_ids = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=True,
+            add_generation_prompt=self.add_generation_prompt,
+            return_tensors="pt",
+        )
+
         ref = sample["messages"][0]["content"]
         ref = ref.replace("Convert the text to speech.\n", "")
         ref = ref.strip()
@@ -78,7 +75,7 @@ class TTSDataset(torch.utils.data.Dataset):
         filename = os.path.basename(filepath)
 
         return {
-            "messages": messages,
+            "input_ids": input_ids,
             "ref": ref,
             "filename": filename,
         }
@@ -116,22 +113,30 @@ def inference(model, tokenizer, audio_tokenizer, dataloader, output_dir, asr_mod
 
     outputs = []
 
-    for _, (messages, refs, filenames, input_ids) in enumerate(tqdm.tqdm(dataloader)):
+    for _, (
+        batched_input_ids,
+        batched_ref,
+        batched_filename,
+    ) in enumerate(tqdm.tqdm(dataloader)):
+        for input_ids, ref, filename in zip(
+            batched_input_ids, batched_ref, batched_filename
+        ):
 
-        responses = model.generate(
-            input_ids=input_ids.cuda(),
-            # temperature=0.2,
-            # top_p=0.8,
-            # do_sample=False,
-            # temperature=1.0,
-            max_new_tokens=1024,
-            min_new_tokens=1,
-        )
+            responses = model.generate(
+                input_ids=input_ids.cuda(),
+                # temperature=0.2,
+                # top_p=0.8,
+                # do_sample=False,
+                # temperature=1.0,
+                max_new_tokens=1024,
+                min_new_tokens=1,
+            )
 
-        for response, ref, filename, input_id in zip(responses, refs, filenames, input_ids):
+            response = responses[0][len(input_ids[0]) :]
+
             text_tokens = []
             audio_tokens = []
-            for token_id in response[len(input_id) :]:
+            for token_id in response:
                 if token_id >= audio_offset:
                     audio_tokens.append(token_id - audio_offset)
                 else:
@@ -170,7 +175,6 @@ def inference(model, tokenizer, audio_tokenizer, dataloader, output_dir, asr_mod
 def load_asr_model():
     import torch
     from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-    from datasets import load_dataset
 
     rank = torch.distributed.get_rank()
     device = f"cuda:{rank}"
@@ -193,12 +197,6 @@ def load_asr_model():
         torch_dtype=torch_dtype,
         device=device,
     )
-
-    # dataset = load_dataset("distil-whisper/librispeech_long", "clean", split="validation")
-    # sample = dataset[0]["audio"]
-
-    # result = pipe(sample)
-    # print(result["text"])
 
     return pipe
 
@@ -328,8 +326,10 @@ if __name__ == "__main__":
     print("Loading data")
     dataset = TTSDataset(
         json_path=args.json_path,
+        tokenizer=tokenizer,
         audio_tokenizer=audio_tokenizer,
         default_system_message=default_system_message,
+        add_generation_prompt=add_generation_prompt,
     )
 
     dataloader = torch.utils.data.DataLoader(
@@ -340,7 +340,7 @@ if __name__ == "__main__":
         pin_memory=True,
         drop_last=False,
         collate_fn=partial(
-            collate_fn, tokenizer=tokenizer, add_generation_prompt=add_generation_prompt
+            collate_fn,
         ),
     )
 

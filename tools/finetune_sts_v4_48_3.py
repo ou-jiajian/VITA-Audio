@@ -35,14 +35,10 @@ from transformers import AutoModel, AutoConfig
 from transformers.testing_utils import CaptureLogger
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from accelerate.utils import DistributedType
-import re
 from transformers.utils.versions import require_version
 from trainer_v4_48_3 import Trainer
 
 
-import sys
 import vita_audio.models
 from vita_audio import build_supervised_dataset_deepspeed
 from vita_audio.tokenizer import update_tokenizer_for_s2s, get_audio_tokenizer
@@ -143,6 +139,7 @@ class ModelArguments:
 
     audio_tokenizer_path: str = field(default=None, metadata={"help": ""})
     audio_tokenizer_type: str = field(default=None, metadata={"help": ""})
+    text_audio_interval_ratio: list[int] = field(default=None, metadata={"help": ""})
     audio_model_freeze: bool = field(default=False, metadata={"help": ""})
 
     vision_model_name_or_path: str = field(default=None, metadata={"help": ""})
@@ -278,80 +275,6 @@ class TrainingArguments(transformers.TrainingArguments):
     mtp_model_lr_mult: float = field(default=1.0, metadata={"help": ""})
 
 
-def maybe_zero_3(param):
-    if hasattr(param, "ds_id"):
-        assert param.ds_status == ZeroParamStatus.NOT_AVAILABLE
-        with zero.GatheredParameters([param]):
-            param = param.data.detach().cpu().clone()
-    else:
-        param = param.detach().cpu().clone()
-    return param
-
-
-# Borrowed from peft.utils.get_peft_model_state_dict
-def get_peft_state_maybe_zero_3(named_params, bias):
-    if bias == "none":
-        to_return = {k: t for k, t in named_params if "lora_" in k}
-    elif bias == "all":
-        to_return = {k: t for k, t in named_params if "lora_" in k or "bias" in k}
-    elif bias == "lora_only":
-        to_return = {}
-        maybe_lora_bias = {}
-        lora_bias_names = set()
-        for k, t in named_params:
-            if "lora_" in k:
-                to_return[k] = t
-                bias_name = k.split("lora_")[0] + "bias"
-                lora_bias_names.add(bias_name)
-            elif "bias" in k:
-                maybe_lora_bias[k] = t
-        for k, t in maybe_lora_bias:
-            if bias_name in lora_bias_names:
-                to_return[bias_name] = t
-    else:
-        raise NotImplementedError
-    to_return = {k: maybe_zero_3(v) for k, v in to_return.items()}
-    return to_return
-
-def rank0_print(*args):
-    if local_rank == 0:
-        logger.info(*args)
-
-
-def safe_save_model_for_hf_trainer(trainer: transformers.Trainer, output_dir: str, bias="none"):
-    """Collects the state dict and dump to disk."""
-    # check if zero3 mode enabled
-    if deepspeed.is_deepspeed_zero3_enabled():
-        state_dict = trainer.model_wrapped._zero3_consolidated_16bit_state_dict()
-    else:
-        if trainer.args.use_lora:
-            state_dict = get_peft_state_maybe_zero_3(
-                trainer.model.named_parameters(), bias
-            )
-        else:
-            state_dict = trainer.model.state_dict()
-    if trainer.args.should_save and trainer.args.local_rank == 0:
-        trainer._save(output_dir, state_dict=state_dict)
-
-
-def test_npu(training_args):
-    local_rank = training_args.local_rank
-    m = torch.nn.Linear(20, 30).to(f"npu:{local_rank}")
-    input = torch.randn(128, 20).to(f"npu:{local_rank}")
-    output = m(input)
-    logger.info("output", output.size())
-
-    # With square kernels and equal stride
-    # m = nn.Conv2d(16, 33, 3, stride=2).to(f"npu:{local_rank}")
-    # non-square kernels and unequal stride and with padding
-    # m = nn.Conv2d(16, 33, (3, 5), stride=(2, 1), padding=(4, 2)).to(f"npu:{local_rank}")
-    # non-square kernels and unequal stride and with padding and dilation
-    m = torch.nn.Conv2d(16, 33, (3, 5), stride=(2, 1), padding=(4, 2), dilation=(3, 1)).to(f"npu:{local_rank}")
-    input = torch.randn(20, 16, 50, 100).to(f"npu:{local_rank}")
-    output = m(input)
-    logger.info("output", output.size())
-
-
 def main():
     # See all possible arguments in src/transformers/training_args.py
     # or by passing the --help flag to this script.
@@ -425,6 +348,8 @@ def main():
     # The .from_pretrained methods guarantee that only one local process can concurrently
     # download model & vocab.
 
+    logger.info(f"{model_args=}")
+
     config_kwargs = {
         "cache_dir": model_args.cache_dir,
         "revision": model_args.model_revision,
@@ -445,7 +370,7 @@ def main():
             config.update_from_string(model_args.config_overrides)
             logger.info(f"New config: {config}")
     config.use_cache = False
-    logger.info(f"config {config.__class__.__name__} {config}")
+    logger.info(f"{config.__class__.__name__=} {config=}")
 
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
@@ -470,12 +395,12 @@ def main():
         else:
             tokenizer.pad_token_id = tokenizer.eod_id
 
-    logger.info(f"tokenizer {tokenizer.__class__.__name__} {len(tokenizer)}")
+    logger.info(f"{tokenizer.__class__.__name__=} {len(tokenizer)=}")
     if "HYTokenizer" in tokenizer.__class__.__name__:
         pass
     else:
         tokenizer = update_tokenizer_for_s2s(tokenizer, model_args.audio_tokenizer_type)
-    logger.info(f"tokenizer {tokenizer.__class__.__name__} {len(tokenizer)}")
+    logger.info(f"{tokenizer.__class__.__name__=} {len(tokenizer)=}")
 
     if model_args.model_name_or_path:
         torch_dtype = (
@@ -499,6 +424,9 @@ def main():
         model = AutoModelForCausalLM.from_config(config, trust_remote_code=model_args.trust_remote_code)
         n_params = sum({p.data_ptr(): p.numel() for p in model.parameters()}.values())
         logger.info(f"Training new model from scratch - Total size={n_params/2**20:.2f}M params")
+
+    if model_args.text_audio_interval_ratio is not None:
+        model.generation_config.mtp_inference_mode = model_args.text_audio_interval_ratio
 
     if model_args.vision_model_name_or_path:
         logger.info(f"Loading {model_args.vision_model_name_or_path}")
@@ -535,7 +463,7 @@ def main():
     if len(tokenizer) > embedding_size:
         model.resize_token_embeddings(len(tokenizer), pad_to_multiple_of=8)
         new_embedding_size = model.get_input_embeddings().weight.shape[0]
-        logger.info(f"new_embedding_size {new_embedding_size}")
+        logger.info(f"{new_embedding_size=}")
     else:
         new_embedding_size = embedding_size
 
@@ -617,7 +545,7 @@ def main():
     
     logger.info(f"model {model}")
 
-    # init new layers
+    # init mtp layers
     if hasattr(model.config, "num_nextn_predict_layers"):
         for mtp_idx in range(model.config.num_nextn_predict_layers):
             layer_idx = model.config.num_hidden_layers - model.config.num_nextn_predict_layers + mtp_idx
@@ -759,9 +687,6 @@ def main():
         else None,
     )
 
-    # trainer.train(resume_from_checkpoint=training_args.resume_from_checkpoint)
-    # trainer.save_state()
-
     # Training
     if training_args.do_train:
         checkpoint = None
@@ -782,8 +707,6 @@ def main():
         trainer.log_metrics("train", metrics)
         trainer.save_metrics("train", metrics)
         trainer.save_state()
-
-    # safe_save_model_for_hf_trainer(trainer=trainer, output_dir=training_args.output_dir, bias=lora_args.lora_bias)
 
     # Evaluation
     if training_args.do_eval:

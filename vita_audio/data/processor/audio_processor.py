@@ -15,6 +15,7 @@ class AudioProcessor:
         self,
         audio_tokenizer_path=None,
         audio_tokenizer_type=None,
+        text_audio_interval_ratio=None,
     ):
 
         self.audio_tokenizer = get_audio_tokenizer(
@@ -23,6 +24,8 @@ class AudioProcessor:
         )
 
         self.audio_tokenizer_type = audio_tokenizer_type
+
+        self.text_audio_interval_ratio = text_audio_interval_ratio
 
         # self.load_model()
 
@@ -69,17 +72,20 @@ class AudioProcessor:
     def is_contiguous(self):
         return self.audio_tokenizer.is_contiguous
 
-    @property
-    def text_audio_interval_ratio(self):
-        if self.audio_tokenizer is None:
-            return []
-        return self.audio_tokenizer.text_audio_interval_ratio
-
     def apply_to_role(self, role, **kwargs):
         return self.audio_tokenizer.apply_to_role(role, **kwargs)
 
+    def text_audio_interval(self, content_input_id, AUD_START_ID, AUD_END_ID):
 
-def add_audio_input_contiguous(input_ids, audio_path, tokenizer, audio_tokenizer):
+        return text_audio_interval(
+            content_input_id,
+            AUD_START_ID,
+            AUD_END_ID,
+            self.text_audio_interval_ratio,
+        )
+
+
+def add_audio_input_contiguous(input_ids, audio_paths, tokenizer, audio_tokenizer):
 
     from ...constants import (
         AUD_START_TOKEN,
@@ -105,7 +111,7 @@ def add_audio_input_contiguous(input_ids, audio_path, tokenizer, audio_tokenizer
     new_input_ids = []
     st = 0
     for aud_idx, aud_pos in enumerate(aud_positions):
-        audio = audio_tokenizer.encode(audio_path, is_contiguous=True)
+        audio = audio_tokenizer.encode(audio_paths[aud_idx], is_contiguous=True)
         audios.append(audio)
         audio_token_length = audio.size(0) + 4
 
@@ -136,3 +142,157 @@ def add_audio_input_contiguous(input_ids, audio_path, tokenizer, audio_tokenizer
     inputs_ids = new_input_ids
 
     return inputs_ids, audios, audio_indices
+
+
+def text_audio_interval_old(input_ids, AUD_START_ID, AUD_END_ID, text_audio_interval_ratio):
+
+    if text_audio_interval_ratio is not None:
+        text_num, audio_num = text_audio_interval_ratio
+
+    else:
+        text_num = 13
+        audio_num = 26
+        text_num = 4
+        audio_num = 10
+
+    # exclude AUD_START and AUD_END
+    audio_num = audio_num - 2
+
+    st = [i for i, x in enumerate(input_ids) if x == AUD_START_ID]
+    ed = [i for i, x in enumerate(input_ids) if x == AUD_END_ID]
+
+    # only text
+    if len(st) == 0 and len(ed) == 0:
+        return input_ids
+
+    assert len(st) == 1
+    assert len(ed) == 1
+
+    st = st[0]
+    ed = ed[0]
+
+    assert st < ed
+
+    # only audio
+    if st == 0 and ed == len(input_ids) - 1:
+        return input_ids
+
+    audio_tokens = input_ids[st + 1 : ed]
+    text_tokens = input_ids[:st] + input_ids[ed + 1 :]
+
+    if False:
+        audio_tokens_chunks = [
+            audio_tokens[i : i + audio_num] for i in range(0, len(audio_tokens), audio_num)
+        ]
+        text_tokens_chunks = [
+            text_tokens[i : i + text_num] for i in range(0, len(text_tokens), text_num)
+        ]
+
+    if False:
+        # [0 1] [2 3 4 5 6 audio_num-1] ...
+        audio_tokens_chunks = [audio_tokens[:2], audio_tokens[2:audio_num]] + [
+            audio_tokens[i : i + audio_num] for i in range(audio_num, len(audio_tokens), audio_num)
+        ]
+        # [0] [1 2 text_num-1] ...
+        text_tokens_chunks = [text_tokens[:1], text_tokens[1:text_num]] + [
+            text_tokens[i : i + text_num] for i in range(text_num, len(text_tokens), text_num)
+        ]
+
+    if True:
+        # [0 1 2 3 4 5 6 audio_num] [] ...
+        audio_tokens_chunks = [audio_tokens[:audio_num]] + [
+            audio_tokens[i : i + audio_num] for i in range(audio_num, len(audio_tokens), audio_num)
+        ]
+        # [0] [] ...
+        text_tokens_chunks = [text_tokens[:1]] + [
+            text_tokens[i : i + text_num] for i in range(1, len(text_tokens), text_num)
+        ]
+
+    chunk_num = min(len(audio_tokens_chunks), len(text_tokens_chunks))
+    audio_tokens_chunks = audio_tokens_chunks[: chunk_num - 1] + [
+        sum(audio_tokens_chunks[chunk_num - 1 :], [])
+    ]
+    text_tokens_chunks = text_tokens_chunks[: chunk_num - 1] + [
+        sum(text_tokens_chunks[chunk_num - 1 :], [])
+    ]
+
+    interval_input_ids = []
+    for text_tokens, audio_tokens in zip(text_tokens_chunks, audio_tokens_chunks):
+        interval_input_ids += text_tokens + [AUD_START_ID] + audio_tokens + [AUD_END_ID]
+        # interval_input_ids += text_tokens + audio_tokens
+
+    return interval_input_ids
+
+
+def text_audio_interval(input_ids, AUD_START_ID, AUD_END_ID, text_audio_interval_ratio):
+
+    if text_audio_interval_ratio is None:
+        #                            T   A
+        text_audio_interval_ratio = [13, 26]
+        #                            T  A  T  A  T  A
+        text_audio_interval_ratio = [1, 4, 3, 8, 4, 10]
+        #                            T  A   T  A
+        text_audio_interval_ratio = [1, 10, 4, 10]
+
+    text_nums = text_audio_interval_ratio[::2]
+    audio_nums = text_audio_interval_ratio[1::2]
+
+    # exclude AUD_START and AUD_END
+    audio_nums = [x - 2 for x in audio_nums]
+
+    st = [i for i, x in enumerate(input_ids) if x == AUD_START_ID]
+    ed = [i for i, x in enumerate(input_ids) if x == AUD_END_ID]
+
+    # only text
+    if len(st) == 0 and len(ed) == 0:
+        return input_ids
+
+    assert len(st) == 1
+    assert len(ed) == 1
+
+    st = st[0]
+    ed = ed[0]
+
+    assert st < ed
+
+    # only audio
+    if st == 0 and ed == len(input_ids) - 1:
+        return input_ids
+
+    audio_tokens = input_ids[st + 1 : ed]
+    text_tokens = input_ids[:st] + input_ids[ed + 1 :]
+
+    audio_tokens_chunks = []
+    while len(audio_tokens) > 0:
+        if len(audio_nums) > 1:
+            audio_num = audio_nums.pop(0)
+        else:
+            audio_num = audio_nums[0]
+
+        audio_tokens_chunks.append(audio_tokens[:audio_num])
+        audio_tokens = audio_tokens[audio_num:]
+
+    text_tokens_chunks = []
+    while len(text_tokens) > 0:
+        if len(text_nums) > 1:
+            text_num = text_nums.pop(0)
+        else:
+            text_num = text_nums[0]
+
+        text_tokens_chunks.append(text_tokens[:text_num])
+        text_tokens = text_tokens[text_num:]
+
+    chunk_num = min(len(audio_tokens_chunks), len(text_tokens_chunks))
+    audio_tokens_chunks = audio_tokens_chunks[: chunk_num - 1] + [
+        sum(audio_tokens_chunks[chunk_num - 1 :], [])
+    ]
+    text_tokens_chunks = text_tokens_chunks[: chunk_num - 1] + [
+        sum(text_tokens_chunks[chunk_num - 1 :], [])
+    ]
+
+    interval_input_ids = []
+    for text_tokens, audio_tokens in zip(text_tokens_chunks, audio_tokens_chunks):
+        interval_input_ids += text_tokens + [AUD_START_ID] + audio_tokens + [AUD_END_ID]
+        # interval_input_ids += text_tokens + audio_tokens
+
+    return interval_input_ids

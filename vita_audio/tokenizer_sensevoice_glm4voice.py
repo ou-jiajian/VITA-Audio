@@ -12,6 +12,13 @@ from transformers import WhisperFeatureExtractor, WhisperTokenizerFast
 
 import torchaudio
 
+from transformers import WhisperFeatureExtractor
+from speech_tokenizer.modeling_whisper import WhisperVQEncoder
+from flow_inference import AudioDecoder
+
+from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
+from funasr.models.sense_voice.model import SenseVoiceSmall
+
 from .constants import (
     AUD_CONTEXT_TOKEN,
     AUD_END_TOKEN,
@@ -85,43 +92,39 @@ class SenseVoiceGLM4VoiceTokenizer:
             self.rank = rank
         logger.info(f"{self.rank=}")
 
-        self.sampling_rate = 16000
+        self.sample_rate = 16000
 
         self.is_discrete = True
         self.is_contiguous = True
 
-        #                            T   A
-        text_audio_interval_ratio = [13, 26]
-        #                            T  A  T  A  T  A
-        text_audio_interval_ratio = [1, 4, 3, 8, 4, 10]
-        #                            T  A   T  A
-        text_audio_interval_ratio = [1, 10, 4, 10]
+        # #                            T   A
+        # text_audio_interval_ratio = [13, 26]
+        # #                            T  A  T  A  T  A
+        # text_audio_interval_ratio = [1, 4, 3, 8, 4, 10]
+        # #                            T  A   T  A
+        # text_audio_interval_ratio = [1, 10, 4, 10]
 
-        self.text_audio_interval_ratio = text_audio_interval_ratio
+        # self.text_audio_interval_ratio = text_audio_interval_ratio
 
     def load_model(self):
         if hasattr(self, "whisper_model"):
             return
+
+        import faulthandler
+        faulthandler.enable()
 
         if self.rank is not None:
             self.device = f"cuda:{self.rank}"
             torch.cuda.set_device(self.rank)
         else:
             self.device = "cpu"
-        logger.info(f"{self.device=}")
 
-        logger.info("Loading SenseVoiceSmall")
-        from funasr.models.sense_voice.model import SenseVoiceSmall
-
+        logger.info(f"{self.device=} Loading SenseVoiceSmall")
         model_dir = "/data/models/FunAudioLLM/SenseVoiceSmall/"
         _, self.kwargs = SenseVoiceSmall.from_pretrained(model=model_dir, device=self.device)
-        logger.info("Loading SenseVoiceSmall Done")
+        logger.info(f"{self.device=} Loading SenseVoiceSmall Done")
 
-        logger.info("Loading GLM4VoiceTokenizer")
-        from transformers import WhisperFeatureExtractor
-        from speech_tokenizer.modeling_whisper import WhisperVQEncoder
-        from flow_inference import AudioDecoder
-
+        logger.info(f"{self.device=} Loading GLM4VoiceTokenizer")
         self.whisper_model = (
             WhisperVQEncoder.from_pretrained(self.model_name_or_path).eval().to(self.device)
         )
@@ -139,7 +142,7 @@ class SenseVoiceGLM4VoiceTokenizer:
                 hift_ckpt_path=hift_checkpoint,
                 device=self.device,
             )
-        logger.info("Loading GLM4VoiceTokenizer Done")
+        logger.info(f"{self.device=} Loading GLM4VoiceTokenizer Done")
 
     def encode(self, audio_path, is_discrete=False, is_contiguous=True, **kwargs):
         if not hasattr(self, "whisper_model"):
@@ -155,14 +158,21 @@ class SenseVoiceGLM4VoiceTokenizer:
             return audio_tokens
 
         if is_contiguous:
-            from funasr.utils.load_utils import load_audio_text_image_video, extract_fbank
 
-            audio, sampling_rate = torchaudio.load(audio_path)
+            audio, sample_rate = torchaudio.load(audio_path)
             audio = audio.mean(0)
-            resampler = torchaudio.transforms.Resample(
-                orig_freq=sampling_rate, new_freq=self.sampling_rate
-            )
-            audio = resampler(audio[None, :])[0, :]
+            if sample_rate != self.sample_rate:
+                if sample_rate not in _resample_buffer:
+                    _resample_buffer[sample_rate] = torchaudio.transforms.Resample(
+                        orig_freq=sample_rate, new_freq=self.sample_rate
+                    ).to(self.device)
+                audio = audio.to(self.device)
+                audio = _resample_buffer[sample_rate](audio[None, :])[0, :]
+                audio = audio.cpu()
+            # resampler = torchaudio.transforms.Resample(
+            #     orig_freq=sample_rate, new_freq=self.sample_rate
+            # )
+            # audio = resampler(audio[None, :])[0, :]
             # audio = audio.to(self.device)
 
             frontend = self.kwargs["frontend"]
@@ -175,7 +185,7 @@ class SenseVoiceGLM4VoiceTokenizer:
 
             return speech
 
-    def decode(self, audio_tokens, **kwargs):
+    def decode(self, audio_tokens, option_steps=10, **kwargs):
         if not hasattr(self, "whisper_model"):
             self.load_model()
 
@@ -193,6 +203,7 @@ class SenseVoiceGLM4VoiceTokenizer:
             prompt_token=flow_prompt_speech_token.to(self.device),
             prompt_feat=prompt_speech_feat.to(self.device),
             finalize=True,
+            option_steps=option_steps,
         )
         tts_speechs = []
         tts_speechs.append(tts_speech.squeeze())

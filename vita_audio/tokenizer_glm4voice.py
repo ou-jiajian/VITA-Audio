@@ -12,6 +12,9 @@ from transformers import WhisperFeatureExtractor, WhisperTokenizerFast
 
 import torchaudio
 
+from transformers import WhisperFeatureExtractor
+from speech_tokenizer.modeling_whisper import WhisperVQEncoder
+from flow_inference import AudioDecoder
 from .constants import (
     AUD_END_TOKEN,
     AUD_START_TOKEN,
@@ -89,14 +92,14 @@ class GLM4VoiceTokenizer:
         self.is_discrete = True
         self.is_contiguous = False
 
-        #                            T   A
-        text_audio_interval_ratio = [13, 26]
-        #                            T  A  T  A  T  A
-        text_audio_interval_ratio = [1, 4, 3, 8, 4, 10]
-        #                            T  A   T  A
-        text_audio_interval_ratio = [1, 10, 4, 10]
+        # #                            T   A
+        # text_audio_interval_ratio = [13, 26]
+        # #                            T  A  T  A  T  A
+        # text_audio_interval_ratio = [1, 4, 3, 8, 4, 10]
+        # #                            T  A   T  A
+        # text_audio_interval_ratio = [1, 10, 4, 10]
 
-        self.text_audio_interval_ratio = text_audio_interval_ratio
+        # self.text_audio_interval_ratio = text_audio_interval_ratio
 
     def load_model(self):
         if hasattr(self, "whisper_model"):
@@ -107,13 +110,8 @@ class GLM4VoiceTokenizer:
             torch.cuda.set_device(self.rank)
         else:
             self.device = "cpu"
-        logger.info(f"{self.device=}")
 
-        logger.info("Loading GLM4VoiceTokenizer")
-        from transformers import WhisperFeatureExtractor
-        from speech_tokenizer.modeling_whisper import WhisperVQEncoder
-        from flow_inference import AudioDecoder
-
+        logger.info(f"{self.device=} Loading GLM4VoiceTokenizer")
         self.whisper_model = (
             WhisperVQEncoder.from_pretrained(self.model_name_or_path).eval().to(self.device)
         )
@@ -131,7 +129,7 @@ class GLM4VoiceTokenizer:
                 hift_ckpt_path=hift_checkpoint,
                 device=self.device,
             )
-        logger.info("Loading GLM4VoiceTokenizer Done")
+        logger.info(f"{self.device=} Loading GLM4VoiceTokenizer Done")
 
     def encode(self, audio_path, **kwargs):
         if not hasattr(self, "whisper_model"):

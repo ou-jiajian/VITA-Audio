@@ -109,15 +109,13 @@ class ASRDataset(torch.utils.data.Dataset):
         if self.audio_tokenizer.apply_to_role("user", is_contiguous=True):
             # contiguous codec
             input_ids, audios, audio_indices = add_audio_input_contiguous(
-                input_ids, audio_path, self.tokenizer, self.audio_tokenizer
+                input_ids, [audio_path], self.tokenizer, self.audio_tokenizer
             )
         else:
             audios = None
             audio_indices = None
 
         input_ids = torch.tensor([input_ids], dtype=torch.long)
-        # print(f"messages {messages}")
-        # print(f"ref {ref}")
         return {
             "input_ids": input_ids,
             "audios": audios,

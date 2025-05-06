@@ -54,6 +54,7 @@ class BaseDataset(torch.utils.data.Dataset):
         dataset_joint=True,
         audio_tokenizer_type=None,
         audio_tokenizer_path=None,
+        text_audio_interval_ratio=None,
         use_megatron=True,
     ):
         super(BaseDataset, self).__init__()
@@ -103,6 +104,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.processor["audio"] = AudioProcessor(
             audio_tokenizer_path=audio_tokenizer_path,
             audio_tokenizer_type=audio_tokenizer_type,
+            text_audio_interval_ratio=text_audio_interval_ratio
         )
 
         if use_megatron:

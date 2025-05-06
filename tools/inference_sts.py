@@ -16,7 +16,6 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, TextIt
 from transformers.generation import GenerationConfig
 
 import torchaudio
-import vita_audio.models
 from vita_audio.data.processor.audio_processor import add_audio_input_contiguous
 from vita_audio.tokenizer import get_audio_tokenizer
 
@@ -35,7 +34,21 @@ torch_dtype = torch.bfloat16
 
 
 if True:
-    # if False:
+# if False:
+    # sensevoice glm4voice tokenizer
+    sys.path.append("third_party/GLM-4-Voice/")
+    sys.path.append("third_party/GLM-4-Voice/cosyvoice/")
+    sys.path.append("third_party/GLM-4-Voice/third_party/Matcha-TTS/")
+
+    audio_tokenizer_path = "/data/models/THUDM/glm-4-voice-tokenizer"
+    flow_path = "/data/models/THUDM/glm-4-voice-decoder"
+
+    audio_tokenizer_type = "sensevoice_glm4voice"
+
+    model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Vanilla/"
+
+# if True:
+if False:
     # glm4voice tokenizer
     sys.path.append("third_party/GLM-4-Voice/")
     sys.path.append("third_party/GLM-4-Voice/cosyvoice/")
@@ -46,9 +59,9 @@ if True:
 
     audio_tokenizer_type = "glm4voice"
 
-    # model_name_or_path = "/data/output/LM/scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp10_stage2.sh/VITA-Audio-Balance/"
+    # model_name_or_path = "VITA-MLLM/VITA-Audio-Balance"
 
-    model_name_or_path = "/data/output/LM/scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp10_stage2.sh/VITA-Audio-Boost/"
+    model_name_or_path = "VITA-MLLM/VITA-Audio-Boost"
 
 
 output_dir = "/data/output/LM/inference/"
@@ -459,26 +472,26 @@ class S2SInference:
         AUD_END_TOKEN = "<|end_of_audio|>"
 
         if prompt_audio_path is not None:
-            if self.audio_tokenizer.apply_to_role("system", is_discrete=True):
-                # discrete codec
-                prompt_audio_tokens = self.audio_tokenizer.encode(prompt_audio_path)
-                prompt_audio_tokens = "".join(f"<|audio_{i}|>" for i in prompt_audio_tokens)
-                system_message = [
-                    {
-                        "role": "system",
-                        "content": f"Your Voice: <|begin_of_audio|>{prompt_audio_tokens}<|end_of_audio|>\n",
-                    },
-                ]
-
-            else:
-                # contiguous codec
-                system_message = self.default_system_message
+            system_message = [
+                {
+                    "role": "system",
+                    "content": f"Your Voice: <|audio|>\n",
+                },
+            ]
 
         elif mode == "luke":
             system_message = self.luke_system_message
 
         else:
             system_message = self.default_system_message
+
+        if prompt_audio_path is not None and self.audio_tokenizer.apply_to_role("user", is_discrete=True):
+            # discrete codec
+            audio_tokens = self.audio_tokenizer.encode(prompt_audio_path)
+            audio_tokens = "".join(f"<|audio_{i}|>" for i in audio_tokens)
+            system_message[-1]["content"] = system_message[-1]["content"].replace(
+                "<|audio|>", f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>"
+            )
 
         if audio_path is not None:
             messages = system_message + [
@@ -507,16 +520,19 @@ class S2SInference:
             messages,
             tokenize=True,
             add_generation_prompt=self.add_generation_prompt,
-            # return_tensors="pt",
         )
-        # .to("cuda")
 
-        if audio_path is not None and self.audio_tokenizer.apply_to_role(
+        if (audio_path is not None or prompt_audio_path is not None) and self.audio_tokenizer.apply_to_role(
             "user", is_contiguous=True
         ):
             # contiguous codec
+            audio_paths = []
+            if audio_path is not None:
+                audio_paths.append(audio_path)
+            if prompt_audio_path is not None:
+                audio_paths.append(prompt_audio_path)
             input_ids, audios, audio_indices = add_audio_input_contiguous(
-                input_ids, audio_path, self.tokenizer, self.audio_tokenizer
+                input_ids, audio_paths, self.tokenizer, self.audio_tokenizer
             )
         else:
             audios = None
@@ -534,8 +550,8 @@ class S2SInference:
 
         outputs = self.model.generate(
             input_ids,
-            # audios=audios,
-            # audio_indices=audio_indices,
+            audios=audios,
+            audio_indices=audio_indices,
         )
 
         output = self.tokenizer.decode(outputs[0], skip_special_tokens=False)
@@ -578,12 +594,10 @@ class S2SInference:
     ):
 
         if prompt_audio_path is not None:
-            prompt_audio_tokens = self.audio_tokenizer.encode(prompt_audio_path)
-            prompt_audio_tokens = "".join(f"<|audio_{i}|>" for i in prompt_audio_tokens)
             system_message = [
                 {
                     "role": "system",
-                    "content": f"Your Voice: <|begin_of_audio|>{prompt_audio_tokens}<|end_of_audio|>\n",
+                    "content": f"Your Voice: <|audio|>\n",
                 },
             ]
 
@@ -593,17 +607,22 @@ class S2SInference:
         else:
             system_message = self.default_system_message
 
-        if audio_path is not None:
-            audio_tokens = self.audio_tokenizer.encode(audio_path)
+        if prompt_audio_path is not None and self.audio_tokenizer.apply_to_role("user", is_discrete=True):
+            # discrete codec
+            audio_tokens = self.audio_tokenizer.encode(prompt_audio_path)
             audio_tokens = "".join(f"<|audio_{i}|>" for i in audio_tokens)
+            system_message[-1]["content"] = system_message[-1]["content"].replace(
+                "<|audio|>", f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>"
+            )
+
+        if audio_path is not None:
             messages = system_message + [
                 {
                     "role": "user",
-                    "content": message + f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>",
+                    "content": message + "\n<|audio|>",
                 },
             ]
-
-        elif len(message) > 0:
+        else:
             messages = system_message + [
                 {
                     "role": "user",
@@ -611,13 +630,39 @@ class S2SInference:
                 },
             ]
 
+        if audio_path is not None and self.audio_tokenizer.apply_to_role("user", is_discrete=True):
+            # discrete codec
+            audio_tokens = self.audio_tokenizer.encode(audio_path)
+            audio_tokens = "".join(f"<|audio_{i}|>" for i in audio_tokens)
+            messages[-1]["content"] = messages[-1]["content"].replace(
+                "<|audio|>", f"<|begin_of_audio|>{audio_tokens}<|end_of_audio|>"
+            )
+
         input_ids = self.tokenizer.apply_chat_template(
             messages,
             tokenize=True,
             add_generation_prompt=self.add_generation_prompt,
-            return_tensors="pt",
-        ).to("cuda:0")
-        # print("input", self.tokenizer.decode(input_ids[0], skip_special_tokens=False), flush=True)
+        )
+
+        if (audio_path is not None or prompt_audio_path is not None) and self.audio_tokenizer.apply_to_role(
+            "user", is_contiguous=True
+        ):
+            # contiguous codec
+            audio_paths = []
+            if audio_path is not None:
+                audio_paths.append(audio_path)
+            if prompt_audio_path is not None:
+                audio_paths.append(prompt_audio_path)
+            input_ids, audios, audio_indices = add_audio_input_contiguous(
+                input_ids, audio_paths, self.tokenizer, self.audio_tokenizer
+            )
+        else:
+            audios = None
+            audio_indices = None
+
+        input_ids = torch.tensor([input_ids], dtype=torch.long).to("cuda")
+
+        print("input", self.tokenizer.decode(input_ids[0], skip_special_tokens=False), flush=True)
 
         self.model.generation_config.do_sample = do_sample
 
@@ -628,6 +673,8 @@ class S2SInference:
         streamer = TextAudioIteratorStreamer(self.tokenizer, skip_prompt=True)
         generation_kwargs = dict(
             input_ids=input_ids,
+            audios=audios,
+            audio_indices=audio_indices,
             streamer=streamer,
         )
         thread = Thread(target=self.model.generate, kwargs=generation_kwargs)

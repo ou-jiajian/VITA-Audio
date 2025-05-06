@@ -58,6 +58,7 @@ def build_supervised_dataset_deepspeed(
 
     audio_tokenizer_path = model_args.audio_tokenizer_path
     audio_tokenizer_type = model_args.audio_tokenizer_type
+    text_audio_interval_ratio = model_args.text_audio_interval_ratio
 
     seed = training_args.seed
     cross_dataset_joint = data_args.cross_dataset_joint
@@ -107,6 +108,7 @@ def build_supervised_dataset_deepspeed(
         dataset_joint=dataset_joint,
         audio_tokenizer_type=audio_tokenizer_type,
         audio_tokenizer_path=audio_tokenizer_path,
+        text_audio_interval_ratio=text_audio_interval_ratio,
         use_megatron=False,
     )
     eval_dataset = None
