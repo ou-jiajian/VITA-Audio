@@ -110,14 +110,15 @@ The following tutorial will take `VITA-Audio-Boost` as an example.
 
 - To train `VITA-Audio-Balance` and other variants, you should modify the `text-audio-interval-ratio`.
 
-VITA-Audio-Boost:
-```
---text-audio-interval-ratio 1 10 4 10 \
-```
-VITA-Audio-Balance:
-```
---text-audio-interval-ratio 1 4 3 8 4 10 \
-```
+  VITA-Audio-Boost:
+  ```
+  --text-audio-interval-ratio 1 10 4 10 \
+  ```
+
+  VITA-Audio-Balance:
+  ```
+  --text-audio-interval-ratio 1 4 3 8 4 10 \
+  ```
 
 - To train `VITA-Audio-Plus-*`, you should use the script like `scripts/deepspeed/sts_qwen25/finetune_sensevoice_glm4voice...`
 
