@@ -23,7 +23,7 @@
 - [Highlights](#-highlights)
 - [Experimental Results](#-experimental-results)
 - [Models](#-models)
-- [Training, Inference and Evaluation](#-training-inference-and-evaluation)
+- [Training](#-training)
 
 
 ## ✨ Highlights
@@ -35,14 +35,36 @@
   
 
 
+## 📌 Exhibition
+
+### Inference 加速 
+不同inferen mode下的模型推理速度
 
 <p align="center">
   <img src="./asset/qa_speed.gif" alt="demogif" width="48%" style="display: inline-block; margin-right: 2%;">
   <img src="./asset/tts_speed.gif" alt="second_gif" width="48%" style="display: inline-block;">
 </p>
 
+### 首个audio片段的生成时间
+<img width="873" alt="企业微信截图_2a021cb3-cadd-4d9f-8e88-2e02540da46b" src="https://github.com/user-attachments/assets/165f943e-ac53-443f-abba-e5eb1e0c0f40" />
 
-## 🐍 Models
+
+### TTS case
+
+prompt：
+
+https://github.com/user-attachments/assets/d3da7129-168f-4c07-9c13-a319eda0c276
+
+
+
+### Spoken QA case
+
+
+
+https://github.com/user-attachments/assets/d3da7129-168f-4c07-9c13-a319eda0c276
+
+
+## 🔔 Models
 
 | Model                   | LLM Size | Huggingface Weights                                           |
 |-------------------------|----------|---------------------------------------------------------------|
@@ -55,23 +77,29 @@
 ## 📈 Experimental Results
 - **Comparison of Spoken Question Answering**.
 
-![image](https://github.com/user-attachments/assets/647e8576-b8c7-4f85-8629-8daf3ed0426e)
+![Clipboard_Screenshot_1746531780](https://github.com/user-attachments/assets/3adcad15-0333-4b92-bfdf-b753b330a3e2)
 
-- **Comparison of Automatic Text to Speech**.
 
-![image](https://github.com/user-attachments/assets/233113f1-36eb-41b3-ad01-23e4386f6b5c)
+- **Comparison of Text to Speech**.
+
+![Clipboard_Screenshot_1746532132](https://github.com/user-attachments/assets/a74c60af-be80-4872-9f1f-a9527dcaeb92)
+
 
 - **Comparison of Automatic Speech Recognition**.
 
-![image](https://github.com/user-attachments/assets/ec5df1dc-6b7b-4fd6-8143-5a4cbf5d88ee)
+![Clipboard_Screenshot_1746532039](https://github.com/user-attachments/assets/d950cae0-c065-4da9-b37a-a471d28158a0)
 
-![image](https://github.com/user-attachments/assets/1fb5ae52-3443-4fc9-a693-b880676e2f4e)
+![Clipboard_Screenshot_1746532022](https://github.com/user-attachments/assets/929f45cd-693a-4ff6-af73-ceec6e875706)
+
+
 
 - **Effectiveness of Inference Acceleration**.
 
-![image](https://github.com/user-attachments/assets/449e7b1c-c61f-42f0-b026-1bf1e3fc4a42)
 
-![image](https://github.com/user-attachments/assets/025d3bbb-a353-4add-a945-172666c9d24b)
+![Clipboard_Screenshot_1746532167](https://github.com/user-attachments/assets/ad8b9e90-cd3c-4968-8653-998811a50006)
+
+![Image](https://github.com/user-attachments/assets/4aa5db8c-362d-4152-8090-92292b9a84c0)
+
 
 
 ## Requirements and Installation
