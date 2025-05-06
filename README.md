@@ -161,7 +161,28 @@ pip install -e .
 - Put it into '../models/THUDM/glm-4-voice-decoder'
 
 
+### Data Format
+#### **Speech QA Interleaved Data Format**
+
+> This format shows how text and audio sequences are interleaved in a structured JSON conversation between a user and an assistant.
+
+```jsonc
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "<|begin_of_audio|> audio_sequence <|end_of_audio|>"
+    },
+    {
+      "role": "assistant",
+      "content": "text_sequence_1 <|begin_of_audio|> audio_sequence_1 <|end_of_audio|> text_sequence_2 <|begin_of_audio|> audio_sequence_2 <|end_of_audio|>"
+    }
+  ]
+}
+```
+
 ## 🎲 Training
+
 
 The following tutorial will take `VITA-Audio-Boost` as an example.
 
