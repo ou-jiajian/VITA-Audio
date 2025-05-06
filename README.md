@@ -37,17 +37,18 @@
 
 ## 📌 Exhibition
 
-### Inference 加速 
-不同inferen mode下的模型推理速度
+### Inference Acceleration
+Model inference speed under different inference modes.
 
 <p align="center">
   <img src="./asset/qa_speed.gif" alt="demogif" width="48%" style="display: inline-block; margin-right: 2%;">
   <img src="./asset/tts_speed.gif" alt="second_gif" width="48%" style="display: inline-block;">
 </p>
 
-### 首个audio片段的生成时间
-<img width="873" alt="企业微信截图_2a021cb3-cadd-4d9f-8e88-2e02540da46b" src="https://github.com/user-attachments/assets/165f943e-ac53-443f-abba-e5eb1e0c0f40" />
-
+### Time to Generate the First Audio Segment
+<div align="center">
+  <img width="400" alt="first audio generate time" src="https://github.com/user-attachments/assets/165f943e-ac53-443f-abba-e5eb1e0c0f40" />
+</div>
 
 ### TTS case
 
