@@ -59,7 +59,7 @@ Model inference speed under different inference modes.
 > 打南边来了个哑巴，腰里别了个喇叭；打北边来了个喇嘛，手里提了个獭犸。  
 > 提着獭犸的喇嘛要拿獭犸换别着喇叭的哑巴的喇叭；别着喇叭的哑巴不愿拿喇叭换提着獭玛的喇嘛的獭犸。  
 > 不知是别着喇叭的哑巴打了提着獭玛的喇嘛一喇叭；还是提着獭玛的喇嘛打了别着喇叭的哑巴一獭玛。  
-> 喇嘛回家炖獭犸；哑巴嘀嘀哒哒吹喇叭
+> 喇嘛回家炖獭犸；哑巴嘀嘀哒哒吹喇叭。
 
 
 
@@ -71,8 +71,8 @@ https://github.com/user-attachments/assets/38da791f-5d72-4d9c-a9b2-cec97c2f2b2b
 ---
 
 > To be or not to be--to live intensely and richly,
-> merely to exist, that depends on ourselves. Let widen and intensify our relations.
-> While we live, let live!
+> merely to exist, that depends on ourselves. Let widen and intensify our relations.   
+> While we live, let live!  
 
 
 
@@ -89,6 +89,13 @@ https://github.com/user-attachments/assets/4cfe4742-e237-42bd-9f17-7935b2285799
 
 
 ---
+> 两个黄鹂鸣翠柳，
+> 一行白鹭上青天。  
+> 窗含西岭千秋雪，
+> 门泊东吴万里船。
+
+https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
+
 
 ---
 ## 🔔 Models
