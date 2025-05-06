@@ -45,26 +45,26 @@ Model inference speed under different inference modes.
   <img src="./asset/tts_speed.gif" alt="second_gif" width="48%" style="display: inline-block;">
 </p>
 
-### Time to Generate the First Audio Segment
+### Time to Generate the First Audio Segment In Streaming Inference
 <div align="center">
   <img width="400" alt="first audio generate time" src="https://github.com/user-attachments/assets/165f943e-ac53-443f-abba-e5eb1e0c0f40" />
 </div>
 
-### TTS case
 
-prompt：
+### Generated Audio Case
+
+
+
+> 打南边来了个哑巴，腰里别了个喇叭；打北边来了个喇嘛，手里提了个獭犸。  
+> 提着獭犸的喇嘛要拿獭犸换别着喇叭的哑巴的喇叭；别着喇叭的哑巴不愿拿喇叭换提着獭玛的喇嘛的獭犸。  
+> 不知是别着喇叭的哑巴打了提着獭玛的喇嘛一喇叭；还是提着獭玛的喇嘛打了别着喇叭的哑巴一獭玛。  
+> 喇嘛回家炖獭犸；哑巴嘀嘀哒哒吹喇叭
+
+
 
 https://github.com/user-attachments/assets/d3da7129-168f-4c07-9c13-a319eda0c276
 
-
-
-### Spoken QA case
-
-
-
-https://github.com/user-attachments/assets/d3da7129-168f-4c07-9c13-a319eda0c276
-
-
+---
 ## 🔔 Models
 
 | Model                   | LLM Size | Huggingface Weights                                           |
