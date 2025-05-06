@@ -17,14 +17,16 @@
 * **`2025.05.06`** 🌟 We are proud to launch VITA-Audio, an end-to-end large speech model with fast audio-text token generation.
 
 
-## Contents <!-- omit in toc -->
+## 📄 Contents <!-- omit in toc -->
 
 
 - [Highlights](#-highlights)
 - [Exhibition](#-exhibition)
-- [Experimental Results](#-experimental-results)
 - [Models](#-models)
+- [Experimental Results](#-experimental-results)
 - [Training](#-training)
+- [Inference](#-inference)
+- [Evaluation](#-evaluation)
 
 
 ## ✨ Highlights
@@ -136,7 +138,7 @@ https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
 
 
 
-## Requirements and Installation
+## 📔 Requirements and Installation
 
 ### Prepare Environment
 ```
@@ -167,7 +169,7 @@ pip install -e .
 - Put it into '../models/THUDM/glm-4-voice-decoder'
 
 
-## Training
+## 🎲 Training
 
 The following tutorial will take `VITA-Audio-Boost` as an example.
 
@@ -253,7 +255,7 @@ python tools/inference_sts.py
 - Set `flow_path` to the path of the audio decoder.
 
 
-## Evaluation
+## 🔎 Evaluation
 
 Evaluate SQA, ASR, and TTS benchmarks
 ```
