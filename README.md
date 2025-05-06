@@ -21,6 +21,7 @@
 
 
 - [Highlights](#-highlights)
+- [Exhibition](#-exhibition)
 - [Experimental Results](#-experimental-results)
 - [Models](#-models)
 - [Training](#-training)
@@ -79,8 +80,15 @@ https://github.com/user-attachments/assets/38da791f-5d72-4d9c-a9b2-cec97c2f2b2b
 https://github.com/user-attachments/assets/fd478065-4041-4eb8-b331-0c03b304d853
 
 
+---
+> The hair has been so little, don't think about it, go to bed early, for your hair. Good night!
 
 
+
+https://github.com/user-attachments/assets/4cfe4742-e237-42bd-9f17-7935b2285799
+
+
+---
 
 ---
 ## 🔔 Models
@@ -223,7 +231,7 @@ The above script may need some adjustments.
 
 
 
-## 📐Inference
+## 📐 Inference
 
 Here we implement a simple script for inference.
 
