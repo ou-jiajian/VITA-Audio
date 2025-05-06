@@ -176,18 +176,6 @@ The above script may need some adjustments.
 
 ## 📐Inference
 
-We provide the converted Huggingface weights in
-
-- https://huggingface.co/VITA-MLLM/VITA-Audio-Boost
-- https://huggingface.co/VITA-MLLM/VITA-Audio-Balance
-- https://huggingface.co/VITA-MLLM/VITA-Audio-Plus-Vanilla
-
-
-- Set `model_name_or_path` to VITA-Audio weights.
-- Set `audio_tokenizer_path` to the path of the audio encoder.
-- Set `flow_path` to the path of the audio decoder.
-
-
 Here we implement a simple script for inference.
 
 It includes examples of speech-to-speech, ASR, and TTS tasks, as well as inference speed testing.
@@ -196,10 +184,14 @@ It includes examples of speech-to-speech, ASR, and TTS tasks, as well as inferen
 python tools/inference_sts.py
 ```
 
+- Set `model_name_or_path` to VITA-Audio weights.
+- Set `audio_tokenizer_path` to the path of the audio encoder.
+- Set `flow_path` to the path of the audio decoder.
+
 
 ## Evaluation
 
-Evaluate with SQA, ASR, and TTS benchmarks
+Evaluate SQA, ASR, and TTS benchmarks
 ```
 bash scripts/deepspeed/evaluate_sts.sh
 ```
