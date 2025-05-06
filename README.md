@@ -36,10 +36,10 @@
 
 
 
-<p align="center">
-  <img src="./asset/qa_speed.gif" alt="demogif" width="600">
+<p align="center" style="display: flex; justify-content: center;">
+  <img src="./asset/qa_speed.gif" alt="demogif" width="600" style="margin-right: 20px;">
+  <img src="./asset/tts_speed.gif" alt="second_gif" width="600">
 </p>
-
 
 
 ## 🐍 Models
