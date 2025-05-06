@@ -66,7 +66,6 @@ Model inference speed under different inference modes.
 https://github.com/user-attachments/assets/38da791f-5d72-4d9c-a9b2-cec97c2f2b2b
 
 
-
 ---
 
 > To be or not to be--to live intensely and richly,
@@ -111,7 +110,7 @@ https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
 
 - **Comparison of Text to Speech**.
 
-![image](https://github.com/user-attachments/assets/d1a5bf29-745b-4e70-9a92-df28ddae0a1d)
+![image](https://github.com/user-attachments/assets/09cf8fd3-d7a5-4b77-be49-5a0ace308f3f)
 
 
 - **Comparison of Automatic Speech Recognition**.
