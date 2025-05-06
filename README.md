@@ -180,7 +180,7 @@ We provide the converted Huggingface weights in
 
 - https://huggingface.co/VITA-MLLM/VITA-Audio-Boost
 - https://huggingface.co/VITA-MLLM/VITA-Audio-Balance
-- - https://huggingface.co/VITA-MLLM/VITA-Audio-Plus-Vanilla
+- https://huggingface.co/VITA-MLLM/VITA-Audio-Plus-Vanilla
 
 
 - Set `model_name_or_path` to VITA-Audio weights.
