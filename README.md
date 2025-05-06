@@ -55,32 +55,23 @@
 ## 📈 Experimental Results
 - **Comparison of Spoken Question Answering**.
 
-![Image](https://github.com/user-attachments/assets/382f4ffa-a2e2-4f03-8c5d-d52626311f3a)
-
-
+![image](https://github.com/user-attachments/assets/647e8576-b8c7-4f85-8629-8daf3ed0426e)
 
 - **Comparison of Automatic Text to Speech**.
 
-![Image](https://github.com/user-attachments/assets/0a49aff6-b94d-4621-97bf-7e7f6ca2c1c5)
+![image](https://github.com/user-attachments/assets/233113f1-36eb-41b3-ad01-23e4386f6b5c)
 
 - **Comparison of Automatic Speech Recognition**.
 
-![Image](https://github.com/user-attachments/assets/9a89f29c-d96c-4bfe-af0c-3a68bf5f6eee)
+![image](https://github.com/user-attachments/assets/ec5df1dc-6b7b-4fd6-8143-5a4cbf5d88ee)
 
+![image](https://github.com/user-attachments/assets/1fb5ae52-3443-4fc9-a693-b880676e2f4e)
 
 - **Effectiveness of Inference Acceleration**.
 
+![image](https://github.com/user-attachments/assets/449e7b1c-c61f-42f0-b026-1bf1e3fc4a42)
 
-
-
-
-![Image](https://github.com/user-attachments/assets/be147a04-e04d-4a6b-bde2-374ae8975c58)
-
-
-
-![Image](https://github.com/user-attachments/assets/4aa5db8c-362d-4152-8090-92292b9a84c0)
-
-
+![image](https://github.com/user-attachments/assets/025d3bbb-a353-4add-a945-172666c9d24b)
 
 
 ## Requirements and Installation
