@@ -14,7 +14,7 @@
 
 
 
-* **`2025.05.06`** 🌟 We are proud to launch VITA-Audio, an end-to-end large speech model with fast audio-text token generation.
+* **`2025.05.07`** 🌟 We are proud to launch VITA-Audio, an end-to-end large speech model with fast audio-text token generation.
 
 
 ## 📄 Contents <!-- omit in toc -->
