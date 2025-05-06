@@ -76,6 +76,12 @@
 
 ## Requirements and Installation
 
+Prepare Environment
+```
+docker pull shenyunhang/pytorch:24.11-py3_2024-1224
+```
+
+Get the Code
 ```
 git clone https://github.com/VITA-MLLM/VITA-Audio.git
 cd VITA-Audio
@@ -98,13 +104,30 @@ pip install -e .
 
 
 ## Training
+
+
+The following tutorial will take `VITA-Audio-Boost` as an example.
+
+- To train `VITA-Audio-Balance` and other variants, you should modify the `text-audio-interval-ratio`.
+
+VITA-Audio-Boost:
+```
+--text-audio-interval-ratio 1 10 4 10 \
+```
+VITA-Audio-Balance:
+```
+--text-audio-interval-ratio 1 4 3 8 4 10 \
+```
+
+- To train `VITA-Audio-Plus-*`, you should use the script like `scripts/deepspeed/sts_qwen25/finetune_sensevoice_glm4voice...`
+
 ### Stage-1 (Audio-Text Alignment)
 
 ```
-bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_stage1.sh 8192 `date +'%Y%m%d_%H'`0000
+bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_stage1.sh 8192 `date +'%Y%m%d_%H%M%S'`
 ```
 
-The above script may need some adjustment.
+The above script may need some adjustments.
 
 - Set `ROOT_PATH` to your code root folder.
 - Set `LOCAL_ROOT_PATH` to a temporary code root folder.
@@ -113,10 +136,10 @@ The above script may need some adjustment.
 ### Stage-2 (Single MCTP Module Training)
 
 ```
-bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp1_stage1.sh 8192 `date +'%Y%m%d_%H'`0000
+bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp1_stage1.sh 8192 `date +'%Y%m%d_%H%M%S'`
 ```
 
-The above script may need some adjustment.
+The above script may need some adjustments.
 
 - Set `ROOT_PATH` to your code root folder.
 - Set `LOCAL_ROOT_PATH` to a temporary code root folder.
@@ -126,10 +149,10 @@ The above script may need some adjustment.
 ### Stage-3 (Multiple MCTP Modules Training)
 
 ```
-bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp10_stage1.sh 8192 `date +'%Y%m%d_%H'`0000
+bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp10_stage1.sh 8192 `date +'%Y%m%d_%H%M%S'`
 ```
 
-The above script may need some adjustment.
+The above script may need some adjustments.
 
 - Set `ROOT_PATH` to your code root folder.
 - Set `LOCAL_ROOT_PATH` to a temporary code root folder.
@@ -139,10 +162,10 @@ The above script may need some adjustment.
 ### Stage-4 (Supervised Fine-tuning)
 
 ```
-bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp10_stage2.sh 8192 `date +'%Y%m%d_%H'`0000
+bash scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp10_stage2.sh 2048 `date +'%Y%m%d_%H%M%S'`
 ```
 
-The above script may need some adjustment.
+The above script may need some adjustments.
 
 - Set `ROOT_PATH` to your code root folder.
 - Set `LOCAL_ROOT_PATH` to a temporary code root folder.
@@ -155,8 +178,8 @@ The above script may need some adjustment.
 
 We provide the converted Huggingface weights in
 
-- https://huggingface.co/VITA-MLLM/VITA-Audio-Boost 
-- https://huggingface.co/VITA-MLLM/VITA-Audio-Balance 
+- https://huggingface.co/VITA-MLLM/VITA-Audio-Boost
+- https://huggingface.co/VITA-MLLM/VITA-Audio-Balance
 
 
 - Set `model_name_or_path` to your VITA-Audio weights.
