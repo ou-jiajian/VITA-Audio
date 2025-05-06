@@ -59,9 +59,9 @@ echo Logging output to "$LOG"
 echo ${@}
 
 ######################################################################
-DATA_PATH=${LOCAL_CODE_PATH}/configs/sts_finetune_stage1.yaml
+DATA_PATH=${LOCAL_CODE_PATH}/configs/sts_finetune_stage2.yaml
 
-MODEL_NAME_OR_PATH=${ROOT_PATH}/output/LM/scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp1_stage1.sh/20250313_040353/
+MODEL_NAME_OR_PATH=${ROOT_PATH}/output/LM/scripts/deepspeed/sts_qwen25/finetune_sensevoice_glm4voice_mtp10_stage1.sh/20250421_180624/
 
 AUDIO_TOKENIZER_PATH=${ROOT_PATH}/models/THUDM/glm-4-voice-tokenizer
 
@@ -80,27 +80,27 @@ torchrun $DISTRIBUTED_ARGS tools/finetune_sts_v4_48_3.py \
     --log_level "info" \
     --do_train \
     --overwrite_output_dir \
-    --config_name vita_audio/models/qwen2_mtp_v4_48_3/config_7B_mtp10.json \
+    --config_name ${LOCAL_CODE_PATH}/VITA-Audio/models/qwen2_mtp_sensevoice_v4_48_3/config_7B_mtp10.json \
     --tokenizer_name $MODEL_NAME_OR_PATH \
     --model_name_or_path $MODEL_NAME_OR_PATH \
     --audio_tokenizer_path $AUDIO_TOKENIZER_PATH \
-    --audio_tokenizer_type "glm4voice" \
+    --audio_tokenizer_type "sensevoice_glm4voice" \
     --dataset_name $DATA_PATH \
     --bf16 True \
     --tf32 True \
     --torch_dtype bfloat16 \
     --output_dir $OUTPUT_DIR \
     --num_train_epochs 1 \
-    --max_steps 8000 \
+    --max_steps 4000 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps 16 \
     --save_strategy "steps" \
     --save_steps 0.1 \
     --save_total_limit 2 \
-    --learning_rate 1.00e-3 \
+    --learning_rate 5.00e-5 \
     --max_grad_norm 1.0 \
-    --weight_decay 0.0 \
+    --weight_decay 0.1 \
     --adam_beta1 0.9 \
     --adam_beta2 0.95 \
     --adam_epsilon 1e-8 \
@@ -110,7 +110,7 @@ torchrun $DISTRIBUTED_ARGS tools/finetune_sts_v4_48_3.py \
     --report_to "tensorboard" \
     --model_max_length ${SEQ_LENGTH} \
     --gradient_checkpointing True \
-    --deepspeed ${LOCAL_CODE_PATH}/scripts/deepspeed/ds_config_zero2.json \
+    --deepspeed ${LOCAL_CODE_PATH}/scripts/deepspeed/ds_config_zero2_no_optimizer.json \
     --trust_remote_code False \
     --ddp_timeout 7200 \
     --ddp_backend ${DISTRIBUTED_BACKEND} \
@@ -121,8 +121,9 @@ torchrun $DISTRIBUTED_ARGS tools/finetune_sts_v4_48_3.py \
     --reset_position_ids \
     --create_attention_mask false \
     --create_attention_mask_2d false \
-    --dataloader_num_workers 8 \
-    --language-model-freeze \
+    --dataloader_num_workers 2 \
+    --mtp_model_lr_mult 1.00e1 \
+    --audio-model-freeze \
     --text-audio-interval-ratio 1 10 4 10 \
 
     #--language-model-freeze \

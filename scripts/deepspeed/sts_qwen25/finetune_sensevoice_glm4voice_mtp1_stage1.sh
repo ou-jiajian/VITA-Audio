@@ -61,7 +61,7 @@ echo ${@}
 ######################################################################
 DATA_PATH=${LOCAL_CODE_PATH}/configs/sts_finetune_stage1.yaml
 
-MODEL_NAME_OR_PATH=${ROOT_PATH}/output/LM/scripts/deepspeed/sts_qwen25/finetune_glm4voice_mtp1_stage1.sh/20250313_040353/
+MODEL_NAME_OR_PATH=${ROOT_PATH}/output/LM/scripts/deepspeed/sts_qwen25/finetune_sensevoice_glm4voice_stage1.sh/20250409_161438/
 
 AUDIO_TOKENIZER_PATH=${ROOT_PATH}/models/THUDM/glm-4-voice-tokenizer
 
@@ -80,18 +80,18 @@ torchrun $DISTRIBUTED_ARGS tools/finetune_sts_v4_48_3.py \
     --log_level "info" \
     --do_train \
     --overwrite_output_dir \
-    --config_name vita_audio/models/qwen2_mtp_v4_48_3/config_7B_mtp10.json \
+    --config_name ${LOCAL_CODE_PATH}/VITA-Audio/models/qwen2_mtp_sensevoice_v4_48_3/config_7B_mtp1.json \
     --tokenizer_name $MODEL_NAME_OR_PATH \
     --model_name_or_path $MODEL_NAME_OR_PATH \
     --audio_tokenizer_path $AUDIO_TOKENIZER_PATH \
-    --audio_tokenizer_type "glm4voice" \
+    --audio_tokenizer_type "sensevoice_glm4voice" \
     --dataset_name $DATA_PATH \
     --bf16 True \
     --tf32 True \
     --torch_dtype bfloat16 \
     --output_dir $OUTPUT_DIR \
     --num_train_epochs 1 \
-    --max_steps 8000 \
+    --max_steps 4000 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps 16 \
@@ -122,6 +122,7 @@ torchrun $DISTRIBUTED_ARGS tools/finetune_sts_v4_48_3.py \
     --create_attention_mask false \
     --create_attention_mask_2d false \
     --dataloader_num_workers 8 \
+    --audio-model-freeze \
     --language-model-freeze \
     --text-audio-interval-ratio 1 10 4 10 \
 

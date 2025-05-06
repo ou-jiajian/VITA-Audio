@@ -35,6 +35,8 @@ ln -s ${ROOT_PATH}/data datasets
 ######################################################################
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source ${CODE_PATH}/scripts/set_env_ds_gpu.sh
+pip3 install transformers==4.48.3
+#pip3 install --no-index --find-links=/data/software/ transformers==4.48.3
 
 ######################################################################
 OUTPUT_DIR=${ROOT_PATH}/output/LM/"$0"/${timestamp}/
