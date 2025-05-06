@@ -44,10 +44,11 @@
 
 ## 🐍 Models
 
-| Model              | LLM Size | Huggingface Weights                                      |
-|--------------------|----------|----------------------------------------------------------|
-| VITA-Audio-Boost   | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Boost        |
-| VITA-Audio-Balance | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Balance      |
+| Model                   | LLM Size | Huggingface Weights                                           |
+|-------------------------|----------|---------------------------------------------------------------|
+| VITA-Audio-Boost        | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Boost             |
+| VITA-Audio-Balance      | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Balance           |
+| VITA-Audio-Plus-Vanilla | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Plus-Vanilla      |
 
 
 
