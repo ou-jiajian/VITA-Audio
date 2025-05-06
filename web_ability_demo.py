@@ -311,8 +311,7 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
 
 def main():
 
-
-    model_name_or_path = "/data1/jarvielong/Fast-Omni/VITA-Audio_Plus-Vanilla/"
+    model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Vanilla"
 
     device_map = "cuda:0"
 
@@ -320,8 +319,10 @@ def main():
     sys.path.append("third_party/GLM-4-Voice/cosyvoice/")
     sys.path.append("third_party/GLM-4-Voice/third_party/Matcha-TTS/")
 
-    audio_tokenizer_path = "/data1/jarvielong/models/THUDM/glm-4-voice-tokenizer"
-    flow_path = "/data1/jarvielong/models/THUDM/glm-4-voice-decoder"
+    from huggingface_hub import snapshot_download
+    audio_tokenizer_path = snapshot_download(repo_id="THUDM/glm-4-voice-tokenizer")
+    flow_path = snapshot_download(repo_id="THUDM/glm-4-voice-decoder")
+    
     audio_tokenizer_rank = 0
     audio_tokenizer_type = "sensevoice_glm4voice"
 
