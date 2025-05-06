@@ -63,9 +63,6 @@ Model inference speed under different inference modes.
 > 不知是别着喇叭的哑巴打了提着獭玛的喇嘛一喇叭；还是提着獭玛的喇嘛打了别着喇叭的哑巴一獭玛。  
 > 喇嘛回家炖獭犸；哑巴嘀嘀哒哒吹喇叭。
 
-
-
-
 https://github.com/user-attachments/assets/38da791f-5d72-4d9c-a9b2-cec97c2f2b2b
 
 
@@ -76,16 +73,12 @@ https://github.com/user-attachments/assets/38da791f-5d72-4d9c-a9b2-cec97c2f2b2b
 > merely to exist, that depends on ourselves. Let widen and intensify our relations.   
 > While we live, let live!  
 
-
-
-
 https://github.com/user-attachments/assets/fd478065-4041-4eb8-b331-0c03b304d853
 
 
 ---
+
 > The hair has been so little, don't think about it, go to bed early, for your hair. Good night!
-
-
 
 https://github.com/user-attachments/assets/4cfe4742-e237-42bd-9f17-7935b2285799
 
@@ -118,7 +111,7 @@ https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
 
 - **Comparison of Text to Speech**.
 
-![Clipboard_Screenshot_1746532132](https://github.com/user-attachments/assets/a74c60af-be80-4872-9f1f-a9527dcaeb92)
+![image](https://github.com/user-attachments/assets/d1a5bf29-745b-4e70-9a92-df28ddae0a1d)
 
 
 - **Comparison of Automatic Speech Recognition**.
