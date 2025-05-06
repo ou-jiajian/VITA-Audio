@@ -1,4 +1,4 @@
-# VITA-Audio: Fast Interleaved Audio-Text Token Generation for Efficient Large Speech-Language Model
+# VITA-Audio: Fast Interleaved Cross-Modal Token Generation for Efficient Large Speech-Language Model
 
 <p align="center">
     <img src="asset/VITA_audio_logos.png" width="50%" height="50%">
