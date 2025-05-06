@@ -9,7 +9,6 @@ import traceback
 from collections import defaultdict
 from typing import Dict, List, Optional, Sequence
 
-import cv2
 import numpy as np
 import torch
 import transformers

@@ -7,7 +7,6 @@ import re
 import traceback
 import uuid
 
-import cv2
 import numpy as np
 import torch
 import yaml
