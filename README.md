@@ -36,11 +36,10 @@
 
 
 
-<p align="center" style="display: flex; justify-content: center;">
-  <img src="./asset/qa_speed.gif" alt="demogif" width="600" style="margin-right: 20px;">
-  <img src="./asset/tts_speed.gif" alt="second_gif" width="600">
+<p align="center" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
+  <img src="./asset/qa_speed.gif" alt="demogif" style="max-width: 100%; height: auto; object-fit: contain; flex: 1;">
+  <img src="./asset/another_gif.gif" alt="second_gif" style="max-width: 100%; height: auto; object-fit: contain; flex: 1;">
 </p>
-
 
 ## 🐍 Models
 
