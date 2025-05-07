@@ -6,7 +6,6 @@
 
 <p align="center">
     <a href="https://arxiv.org/abs/2505.03739" target="_blank"><img src="https://img.shields.io/badge/VITA%20Audio-Report-b5212f.svg?logo=arxiv" /></a>
-    <a href="https://huggingface.co/spaces/shenyunhang/VITA-Audio" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Demo-ffc107?color=ffc107&logoColor=white" /></a>
     <a href="https://huggingface.co/collections/VITA-MLLM/vita-audio-680f036c174441e7cdf02575" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-ffc107?color=ffc107&logoColor=white" /></a>
 </p>
 
@@ -56,10 +55,6 @@ Model inference speed under different inference modes.
 </div>
 
 
-### Online Demo
-We provide an [online demo](https://huggingface.co/spaces/shenyunhang/VITA-Audio) that you can try. You can input either speech or text, and the model will generate both audio and text responses simultaneously.
-
-<img width="1674" alt="企业微信截图_04a0c430-bf91-4baf-8705-a8e0707ef597" src="https://github.com/user-attachments/assets/493480f1-485b-4370-b1c0-aa565dec60b8" />
 
 
 
