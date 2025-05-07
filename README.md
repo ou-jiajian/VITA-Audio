@@ -166,21 +166,66 @@ pip install -e .
 
 
 ### Data Format
-#### **Speech QA Interleaved Data Format**
+#### **Speech QA Data Format**
 
-> This format shows how text and audio sequences are interleaved in a structured JSON conversation between a user and an assistant.
 
 ```jsonc
 {
   "messages": [
     {
-      "role": "user",
-      "content": "<|begin_of_audio|> audio_sequence <|end_of_audio|>"
+      "content": "<|audio|>",
+      "role": "user"
     },
     {
-      "role": "assistant",
-      "content": "text_sequence_1 <|begin_of_audio|> audio_sequence_1 <|end_of_audio|> text_sequence_2 <|begin_of_audio|> audio_sequence_2 <|end_of_audio|>"
+      "content": "好的，这样排列更合理：这些生物废弃物如鸡蛋壳、蛤壳、贻贝壳比其他工业废渣更有价值。研究表明，它们在能源、材料、环境保护等领域有广泛应用。高效利用贝壳能提高资源利用效率，减少废弃物，减轻环境负担。特别是在这些领域中，鸡蛋壳因为含有丰富的钙元素，被用于制造医药品和肥料。\n<|audio|>",
+      "role": "assistant"
     }
+  ],
+  "audios": [
+    "datasets/VITA-MLLM/AudioQA-1M/QA_1450K_question_tar/question_shuf_part_8/wav/000000200014510ac1fd776006fc66b36f7f3cda76_question.wav",
+    "datasets/VITA-MLLM/AudioQA-1M/QA_1450K_answer_part1_tar/answer_part1_shuf_part_3/wav/000000200114510ac1fd776006fc66b36f7f3cda76_F10.wav"
+  ]
+}
+```
+
+#### **ASR Data Format**
+
+
+```jsonc
+{
+  "messages": [
+    {
+      "content": "Convert the speech to text.\n<|audio|>",
+      "role": "user"
+    },
+    {
+      "content": "没有跟大家说是在做什么",
+      "role": "assistant"
+    }
+  ],
+  "audios": [
+    "datasets/wenet-e2e/wenetspeech/data/cuts_L_fixed.00000000/X00/X0000016296_135343932_S00019.wav"
+  ]
+}
+```
+
+#### **TTS Data Format**
+
+
+```jsonc
+{
+  "messages": [
+    {
+      "content": "Convert the text to speech.\n那我情愿无药可救。",
+      "role": "user"
+    },
+    {
+      "content": "<|audio|>",
+      "role": "assistant"
+    }
+  ],
+  "audios": [
+    "datasets/Wenetspeech4TTS/WenetSpeech4TTS/Premium/WenetSpeech4TTS_Premium_9/wavs/X0000001735_50639692_S00035.wav"
   ]
 }
 ```
