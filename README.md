@@ -4,10 +4,10 @@
     <img src="asset/VITA_audio_logos.png" width="50%" height="50%">
 </p>
 
-<p align="center">
-    <a href="https://arxiv.org/abs/2505.03739" target="_blank"><img src="https://img.shields.io/badge/VITA%20Audio-Report-b5212f.svg?logo=arxiv" /></a>
-    <a href="https://huggingface.co/collections/VITA-MLLM/vita-audio-680f036c174441e7cdf02575" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-ffc107?color=ffc107&logoColor=white" /></a>
-</p>
+
+<font size=7><div align='center' > [[📖 VITA-Audio Paper](https://arxiv.org/abs/2505.03739)] [[🤖 Model Weight](https://huggingface.co/collections/VITA-MLLM/vita-audio-680f036c174441e7cdf02575)]  [[💬 WeChat (微信)](./asset/wechat-group.jpg)]</div></font>
+
+
 
 
 
