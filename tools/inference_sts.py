@@ -45,7 +45,7 @@ if True:
 
     audio_tokenizer_type = "sensevoice_glm4voice"
 
-    model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Vanilla/"
+    model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Vanilla"
 
 # if True:
 if False:
