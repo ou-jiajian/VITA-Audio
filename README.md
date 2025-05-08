@@ -96,6 +96,17 @@ https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
 
 
 ---
+
+
+
+## :label: TODO 
+
+- [x] Release training code and inference code.
+- [x] Release checkpoints.
+- [ ] Release VITA-Audio-Plus.
+- [ ] Release the cleaned open-source data JSON and audio.
+
+
 ## 🔔 Models
 
 | Model                   | LLM Size | Huggingface Weights                                           |
