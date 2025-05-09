@@ -317,7 +317,7 @@ The above script may need some adjustments.
 
 Here we implement a simple script for inference.
 
-It includes examples of speech-to-speech, ASR, and TTS tasks, as well as inference speed testing.
+It includes examples of speech-to-speech, ASR, and TTS tasks, as well as streaming and non-streaming inference speed testing.
 
 ```
 python tools/inference_sts.py
