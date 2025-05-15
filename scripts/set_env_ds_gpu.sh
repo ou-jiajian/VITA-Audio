@@ -33,8 +33,7 @@ pip3 install -e `pwd`
 #export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
 
 #apt update
-#apt install -y openssh-server
-#apt install -y rsync
+#apt install -y openssh-server rsync tmux htop
 
 ######################################################################
 

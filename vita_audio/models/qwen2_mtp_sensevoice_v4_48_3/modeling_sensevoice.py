@@ -1053,13 +1053,13 @@ class SenseVoiceSmall(nn.Module):
 
         return encoder_out, encoder_out_lens
 
-    def export(self, **kwargs):
-        from export_meta import export_rebuild_model
+    # def export(self, **kwargs):
+    #     from export_meta import export_rebuild_model
 
-        if "max_seq_len" not in kwargs:
-            kwargs["max_seq_len"] = 512
-        models = export_rebuild_model(model=self, **kwargs)
-        return models
+    #     if "max_seq_len" not in kwargs:
+    #         kwargs["max_seq_len"] = 512
+    #     models = export_rebuild_model(model=self, **kwargs)
+    #     return models
 
 
 class AudioEncoder(nn.Module):
