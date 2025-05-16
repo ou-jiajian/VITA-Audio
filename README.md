@@ -156,6 +156,7 @@ docker pull shenyunhang/pytorch:24.11-py3_2024-1224
 ```
 git clone https://github.com/VITA-MLLM/VITA-Audio.git
 cd VITA-Audio
+git submodule update --init --recursive
 pip install -r requirements_ds_gpu.txt
 pip install -e .
 ```
