@@ -120,7 +120,11 @@ class SenseVoiceGLM4VoiceTokenizer:
             self.device = "cpu"
 
         logger.info(f"{self.device=} Loading SenseVoiceSmall")
-        model_dir = "/data/models/FunAudioLLM/SenseVoiceSmall/"
+        
+        # TODO: add argument
+        from huggingface_hub import snapshot_download
+        model_dir = snapshot_download(repo_id="FunAudioLLM/SenseVoiceSmall")
+        
         _, self.kwargs = SenseVoiceSmall.from_pretrained(model=model_dir, device=self.device)
         logger.info(f"{self.device=} Loading SenseVoiceSmall Done")
 
