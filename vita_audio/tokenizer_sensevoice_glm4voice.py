@@ -163,7 +163,11 @@ class SenseVoiceGLM4VoiceTokenizer:
 
         if is_contiguous:
 
-            audio, sample_rate = torchaudio.load(audio_path)
+            if isinstance(audio_path, tuple):
+                audio, sample_rate = audio_path
+            else:
+                audio, sample_rate = torchaudio.load(audio_path)
+
             audio = audio.mean(0)
             if sample_rate != self.sample_rate:
                 if sample_rate not in _resample_buffer:
