@@ -1,23 +1,20 @@
-import torch
-import os
-import numpy as np
 import copy
-import gradio as gr
+import math
+import os
 import sys
-from vita_audio.tokenizer import get_audio_tokenizer
-from vita_audio.data.processor.audio_processor import add_audio_input_contiguous
 
-
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer, AutoConfig
+import gradio as gr
+import numpy as np
+import torch
+from numba import jit
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 from transformers.generation import GenerationConfig
 
-
+from vita_audio.data.processor.audio_processor import add_audio_input_contiguous
+from vita_audio.tokenizer import get_audio_tokenizer
 
 PUNCTUATION = "！？。＂＃＄％＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､、〃》「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〰〾〿–—‘’‛“”„‟…‧﹏."
 
-
-import math
-from numba import jit
 
 @jit
 def float_to_int16(audio: np.ndarray) -> np.ndarray:
@@ -27,10 +24,9 @@ def float_to_int16(audio: np.ndarray) -> np.ndarray:
 
 
 def is_wav(file_path):
-    wav_extensions = {'.wav'}
+    wav_extensions = {".wav"}
     _, ext = os.path.splitext(file_path)
     return ext.lower() in wav_extensions
-
 
 
 def _parse_text(text):
@@ -65,51 +61,23 @@ def _parse_text(text):
     return "".join(lines)
 
 
-
 def _launch_demo(model, tokenizer, audio_tokenizer):
-    def predict(_chatbot, task_history,task):
+    def predict(_chatbot, task_history, task):
         chat_query = task_history[-1][0]
         print(task_history)
 
         messages = []
 
-        audio_path_list =[]
-        if task == 'Spoken QA':
+        audio_path_list = []
+        if task == "Spoken QA":
             messages = [
-            {
-                "role": "system",
-                #"content": "Your Name: Luke\nYour Gender: male\n\nRespond in a text-audio interleaved manner.",
-                # "content": "Your Name: Lucy\nYour Gender: female\nRespond in a text-audio interleaved manner.",
-                "content": "Your Name: Omni\nYour Gender: female\nRespond in a text-audio interleaved manner.",
-            },
+                {
+                    "role": "system",
+                    # "content": "Your Name: Luke\nYour Gender: male\n\nRespond in a text-audio interleaved manner.",
+                    # "content": "Your Name: Lucy\nYour Gender: female\nRespond in a text-audio interleaved manner.",
+                    "content": "Your Name: Omni\nYour Gender: female\nRespond in a text-audio interleaved manner.",
+                },
             ]
-            for i, (q, a) in enumerate(task_history):
-
-                if isinstance(q, (tuple, list)) and is_wav(q[0]):
-                    audio_path_list.append(q[0])
-                    messages = messages + [
-                    {
-                        "role": "user",
-                        "content": f"\n<|audio|>",
-                    },
-                ]
-                else:
-                    messages = messages + [
-                        {
-                            "role": "user",
-                            "content": q ,
-                        },
-                    ]
-                if a != None:
-                    messages = messages + [
-                        {
-                            "role": "assistant",
-                            "content": a ,
-                        },
-                    ]
-            model.generation_config.do_sample = False
-
-        elif task == 'TTS':
             for i, (q, a) in enumerate(task_history):
 
                 if isinstance(q, (tuple, list)) and is_wav(q[0]):
@@ -124,18 +92,45 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
                     messages = messages + [
                         {
                             "role": "user",
-                            "content": f'Convert the text to speech.\n{q}' ,
+                            "content": q,
                         },
                     ]
                 if a != None:
                     messages = messages + [
                         {
                             "role": "assistant",
-                            "content": a ,
+                            "content": a,
+                        },
+                    ]
+            model.generation_config.do_sample = False
+
+        elif task == "TTS":
+            for i, (q, a) in enumerate(task_history):
+
+                if isinstance(q, (tuple, list)) and is_wav(q[0]):
+                    audio_path_list.append(q[0])
+                    messages = messages + [
+                        {
+                            "role": "user",
+                            "content": f"\n<|audio|>",
+                        },
+                    ]
+                else:
+                    messages = messages + [
+                        {
+                            "role": "user",
+                            "content": f"Convert the text to speech.\n{q}",
+                        },
+                    ]
+                if a != None:
+                    messages = messages + [
+                        {
+                            "role": "assistant",
+                            "content": a,
                         },
                     ]
             model.generation_config.do_sample = True
-        elif task == 'ASR':
+        elif task == "ASR":
             for i, (q, a) in enumerate(task_history):
 
                 if isinstance(q, (tuple, list)) and is_wav(q[0]):
@@ -150,21 +145,19 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
                     messages = messages + [
                         {
                             "role": "user",
-                            "content": f"{q}" ,
+                            "content": f"{q}",
                         },
                     ]
                 if a != None:
                     messages = messages + [
                         {
                             "role": "assistant",
-                            "content": a ,
+                            "content": a,
                         },
                     ]
                 model.generation_config.do_sample = False
 
-
-
-        add_generation_prompt =True
+        add_generation_prompt = True
         input_ids = tokenizer.apply_chat_template(
             messages,
             tokenize=True,
@@ -172,21 +165,18 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
             # return_tensors="pt",
         )
 
-
         input_ids, audios, audio_indices = add_audio_input_contiguous(
             input_ids, audio_path_list, tokenizer, audio_tokenizer
         )
-
 
         input_ids = torch.tensor([input_ids], dtype=torch.long).to("cuda")
 
         # print("input", tokenizer.decode(input_ids[0], skip_special_tokens=False), flush=True)
 
-
         if audio_path_list == []:
             audios = None
             audio_indices = None
-        
+
         outputs = model.generate(
             input_ids,
             audios=audios,
@@ -200,20 +190,24 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
         begin_of_audio = tokenizer.convert_tokens_to_ids("<|begin_of_audio|>")
         end_of_audio = tokenizer.convert_tokens_to_ids("<|end_of_audio|>")
         im_end = tokenizer.convert_tokens_to_ids("<|im_end|>")
-        response = outputs[0][len(input_ids[0]):]
-        
+        response = outputs[0][len(input_ids[0]) :]
+
         audio_tokens = []
         text_tokens = []
         for token_id in response:
             if token_id >= audio_offset:
                 audio_tokens.append(token_id - audio_offset)
-            elif (token_id.item() != begin_of_audio) and (token_id.item() != end_of_audio) and (token_id.item() != im_end):
+            elif (
+                (token_id.item() != begin_of_audio)
+                and (token_id.item() != end_of_audio)
+                and (token_id.item() != im_end)
+            ):
                 text_tokens.append(token_id)
 
         if len(audio_tokens) > 0:
             tts_speech = audio_tokenizer.decode(audio_tokens)
             audio_np = float_to_int16(tts_speech.cpu().numpy())
-            tts_speech = (22050,audio_np)
+            tts_speech = (22050, audio_np)
         else:
             tts_speech = None
 
@@ -228,8 +222,6 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
         # print("answer:  ",outputs)
         return _chatbot, tts_speech
 
-
-
     def add_text(history, task_history, text):
         task_text = text
         # import pdb;pdb.set_trace()
@@ -239,7 +231,6 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
         task_history = task_history + [(task_text, None)]
         return history, task_history, ""
 
-
     def add_audio(history, task_history, file):
         print(file)
         if file is None:
@@ -247,9 +238,6 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
         history = history + [((file,), None)]
         task_history = task_history + [((file,), None)]
         return history, task_history
-
-
-
 
     def reset_user_input():
         # import pdb;pdb.set_trace()
@@ -259,44 +247,49 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
         task_history.clear()
         return []
 
-
-
     with gr.Blocks(title="VITA-Audio-Plus-Vanilla") as demo:
         gr.Markdown("""<center><font size=8>VITA-Audio-Plus-Vanilla</center>""")
-        gr.Markdown("""<center><font size=4>The deployment of the VITA-Audio-Plus-Vanilla model employs a non-streaming deployment approach. The currently deployed model is VITA-Audio-Plus-Vanilla. For the ASR and TTS tasks, only single-turn dialogues are supported. In the Spoken QA task, generated text is used as dialogue history to reduce the context length.</center>""")
-        chatbot = gr.Chatbot(label='VITA-Audio-Plus-Vanilla', elem_classes="control-height", height=500)
-        query = gr.Textbox(lines=2, label='Text Input')
+        gr.Markdown(
+            """<center><font size=4>The deployment of the VITA-Audio-Plus-Vanilla model employs a non-streaming deployment approach. The currently deployed model is VITA-Audio-Plus-Vanilla. For the ASR and TTS tasks, only single-turn dialogues are supported. In the Spoken QA task, generated text is used as dialogue history to reduce the context length.</center>"""
+        )
+        chatbot = gr.Chatbot(
+            label="VITA-Audio-Plus-Vanilla", elem_classes="control-height", height=500
+        )
+        query = gr.Textbox(lines=2, label="Text Input")
         task_history = gr.State([])
         with gr.Row():
             add_text_button = gr.Button("Submit Text (提交文本)")
             add_audio_button = gr.Button("Submit Audio (提交音频)")
             empty_bin = gr.Button("🧹 Clear History (清除历史)")
-            task = gr.Radio(
-                        choices = ["ASR", "TTS", "Spoken QA"], label="TASK",value = 'Spoken QA'
-                    )
+            task = gr.Radio(choices=["ASR", "TTS", "Spoken QA"], label="TASK", value="Spoken QA")
 
         with gr.Row(scale=1):
-                
-                record_btn = gr.Audio(sources=[ "microphone","upload"], type="filepath", label="🎤 Record or Upload Audio (录音或上传音频)", show_download_button=True, waveform_options=gr.WaveformOptions(sample_rate=16000))
-                audio_output = gr.Audio(label="Play", streaming=True,
-                                        autoplay=True, show_download_button=True)
-            
 
+            record_btn = gr.Audio(
+                sources=["microphone", "upload"],
+                type="filepath",
+                label="🎤 Record or Upload Audio (录音或上传音频)",
+                show_download_button=True,
+                waveform_options=gr.WaveformOptions(sample_rate=16000),
+            )
+            audio_output = gr.Audio(
+                label="Play", streaming=True, autoplay=True, show_download_button=True
+            )
 
-        add_text_button.click(add_text, [chatbot, task_history, query], [chatbot, task_history], show_progress=True).then(
-            reset_user_input, [], [query]
-        ).then(
-                predict, [chatbot, task_history,task], [chatbot,audio_output], show_progress=True  
+        add_text_button.click(
+            add_text, [chatbot, task_history, query], [chatbot, task_history], show_progress=True
+        ).then(reset_user_input, [], [query]).then(
+            predict, [chatbot, task_history, task], [chatbot, audio_output], show_progress=True
         )
 
-       
         empty_bin.click(reset_state, [task_history], [chatbot], show_progress=True)
 
-
-        add_audio_button.click(add_audio, [chatbot, task_history,record_btn], [chatbot, task_history], show_progress=True).then(
-                predict, [chatbot, task_history,task], [chatbot,audio_output], show_progress=True   
-        )
-
+        add_audio_button.click(
+            add_audio,
+            [chatbot, task_history, record_btn],
+            [chatbot, task_history],
+            show_progress=True,
+        ).then(predict, [chatbot, task_history, task], [chatbot, audio_output], show_progress=True)
 
     server_port = 18806
     demo.launch(
@@ -306,8 +299,8 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
         server_port=server_port,
         show_api=False,
         show_error=False,
- 
-        )
+    )
+
 
 def main():
 
@@ -320,9 +313,10 @@ def main():
     sys.path.append("third_party/GLM-4-Voice/third_party/Matcha-TTS/")
 
     from huggingface_hub import snapshot_download
+
     audio_tokenizer_path = snapshot_download(repo_id="THUDM/glm-4-voice-tokenizer")
     flow_path = snapshot_download(repo_id="THUDM/glm-4-voice-decoder")
-    
+
     audio_tokenizer_rank = 0
     audio_tokenizer_type = "sensevoice_glm4voice"
 
@@ -339,7 +333,6 @@ def main():
     )
     # print(f"{tokenizer=}")
     # print(f"{tokenizer.get_chat_template()=}")
-
 
     model = AutoModelForCausalLM.from_pretrained(
         model_name_or_path,
@@ -365,14 +358,11 @@ def main():
     model.generation_config.top_p = 1.0
     model.generation_config.num_beams = 1
     model.generation_config.pad_token_id = tokenizer.pad_token_id
-    model.generation_config.mtp_inference_mode = [8192,10]
-
+    model.generation_config.mtp_inference_mode = [8192, 10]
 
     _launch_demo(model, tokenizer, audio_tokenizer)
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     main()
