@@ -168,9 +168,9 @@ class BaseDataset(torch.utils.data.Dataset):
                     this_data = this_data.add_column("videos", videos)
 
                 if "audios" not in column_names:
-                    # videos = [[]] * len(this_data)
+                    # audios = [[]] * len(this_data)
                     audios = [None] * len(this_data)
-                    this_data = this_data.add_column("audios", videos)
+                    this_data = this_data.add_column("audios", audios)
 
                 if False:
                     column_names = list(this_data.features)
