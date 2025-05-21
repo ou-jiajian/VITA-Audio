@@ -103,7 +103,7 @@ https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
 
 - [x] Release training code and inference code.
 - [x] Release checkpoints.
-- [ ] Release VITA-Audio-Plus.
+- [x] Release VITA-Audio-Plus.
 - [ ] Release the cleaned open-source data JSON and audio.
 
 
@@ -114,7 +114,7 @@ https://github.com/user-attachments/assets/382620ee-bb2a-488e-9e00-71afd2342b56
 | VITA-Audio-Boost        | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Boost             |
 | VITA-Audio-Balance      | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Balance           |
 | VITA-Audio-Plus-Vanilla | 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Plus-Vanilla      |
-
+| VITA-Audio-Plus-Boost| 7B       | https://huggingface.co/VITA-MLLM/VITA-Audio-Plus-Boost     |
 
 
 ## 📈 Experimental Results
