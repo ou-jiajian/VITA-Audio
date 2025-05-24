@@ -3,13 +3,7 @@
 set -e
 set -x
 
-SEQ_LENGTH="$1"
-if [ -z "$SEQ_LENGTH" ]
-then
-	SEQ_LENGTH=32768
-fi
-
-timestamp="$2"
+timestamp="$1"
 if [ -z "$timestamp" ]
 then
 	timestamp=`date +'%Y%m%d_%H%M%S'`
