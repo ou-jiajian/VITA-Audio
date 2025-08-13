@@ -26,7 +26,7 @@ torch.manual_seed(1234)
 
 device_map = "cuda:0"
 audio_tokenizer_rank = 0
-torch_dtype = torch.bfloat16
+torch_dtype = torch.float16
 
 # model_name_or_path = sys.argv[1]
 # audio_tokenizer_path = sys.argv[2]
@@ -236,7 +236,7 @@ class S2SInference:
             trust_remote_code=True,
             device_map=device_map,
             torch_dtype=torch_dtype,
-            attn_implementation="flash_attention_2",
+            
         ).eval()
         # print("model", model)
         print(f"{model.config.model_type=}")
