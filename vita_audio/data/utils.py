@@ -100,7 +100,12 @@ def draw_data(all_datasets, output_path, tokenizer=None, image_processor=None):
             # print(this_data)
             if isinstance(this_data, Dict):
                 # print(this_data.keys())
-                messages = this_data["messages"]
+                if "messages" in this_data:
+                    messages = this_data["messages"]
+                elif "conversations" in this_data:
+                    messages = this_data["conversations"]
+                else:
+                    raise KeyError(f"Expected 'messages' or 'conversations' key in data, but got: {list(this_data.keys())}")
                 if "images" in this_data:
                     images = this_data["images"]
                 if "videos" in this_data:

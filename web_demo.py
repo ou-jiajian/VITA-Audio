@@ -304,9 +304,9 @@ def _launch_demo(model, tokenizer, audio_tokenizer):
 
 def main():
 
-    model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Vanilla"
+    model_name_or_path = "/data/models/VITA-MLLM/VITA-Audio-Plus-Vanilla"
 
-    device_map = "cuda:0"
+    device_map = "auto"
 
     sys.path.append("third_party/GLM-4-Voice/")
     sys.path.append("third_party/GLM-4-Voice/cosyvoice/")
@@ -314,13 +314,13 @@ def main():
 
     from huggingface_hub import snapshot_download
 
-    audio_tokenizer_path = snapshot_download(repo_id="THUDM/glm-4-voice-tokenizer")
-    flow_path = snapshot_download(repo_id="THUDM/glm-4-voice-decoder")
+    audio_tokenizer_path = "/data/models/THUDM/glm-4-voice-tokenizer"
+    flow_path = "/data/models/THUDM/glm-4-voice-decoder"
 
     audio_tokenizer_rank = 0
     audio_tokenizer_type = "sensevoice_glm4voice"
 
-    torch_dtype = torch.bfloat16
+    torch_dtype = torch.float32
     audio_tokenizer = get_audio_tokenizer(
         audio_tokenizer_path, audio_tokenizer_type, flow_path=flow_path, rank=audio_tokenizer_rank
     )
@@ -339,7 +339,6 @@ def main():
         trust_remote_code=True,
         device_map=device_map,
         torch_dtype=torch_dtype,
-        attn_implementation="flash_attention_2",
     ).eval()
 
     # print(f"{model.config.model_type=}")

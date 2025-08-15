@@ -162,3 +162,8 @@ cython_debug/
 #.idea/
 #
 *.sw*
+
+# Local model weights (do not commit)
+VITA-Audio-Balance/
+VITA-Audio-Plus-Vanilla/
+Qwen2.5-7B-Instruct/

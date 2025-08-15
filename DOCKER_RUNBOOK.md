@@ -116,7 +116,7 @@ flow_path = "/data/models/THUDM/glm-4-voice-decoder"
 ---
 
 ## 7. 四阶段训练流程
-训练会在 `/data_local/VITA-Audio/` 进行，输出到 `/data/output/...`。
+训练会在 `/data/VITA-Audio/` 进行，输出到 `/data/output/...`。
 
 单机单卡示例：
 ```bash

@@ -61,7 +61,7 @@ echo ${@}
 ######################################################################
 DATA_PATH=${LOCAL_CODE_PATH}/configs/sts_finetune_stage1.yaml
 
-MODEL_NAME_OR_PATH=${ROOT_PATH}/output/LM/scripts/deepspeed/sts_qwen25/finetune_sensevoice_glm4voice_mtp1_stage1.sh/20250418_075843/
+MODEL_NAME_OR_PATH=${ROOT_PATH}/models/VITA-MLLM/VITA-Audio-Plus-Vanilla
 
 AUDIO_TOKENIZER_PATH=${ROOT_PATH}/models/THUDM/glm-4-voice-tokenizer
 
@@ -114,7 +114,7 @@ torchrun $DISTRIBUTED_ARGS tools/finetune_sts_v4_48_3.py \
     --trust_remote_code False \
     --ddp_timeout 7200 \
     --ddp_backend ${DISTRIBUTED_BACKEND} \
-    --attn_implementation flash_attention_2 \
+    --attn_implementation eager \
     --seed 42 \
     --data_seed 42 \
     --reset_attention_mask \

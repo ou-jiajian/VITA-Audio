@@ -46,7 +46,7 @@ target_sample_rate = 16000
 # init parms
 args = get_args()
 # 先设定一个死地址
-model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Boost"
+model_name_or_path = "/home/linux/VITA/VITA-Audio/VITA-Audio-Balance"
 
 
 device_map = "auto"
@@ -56,8 +56,8 @@ sys.path.append("third_party/GLM-4-Voice/")
 sys.path.append("third_party/GLM-4-Voice/cosyvoice/")
 sys.path.append("third_party/GLM-4-Voice/third_party/Matcha-TTS/")
 
-audio_tokenizer_path = snapshot_download(repo_id="THUDM/glm-4-voice-tokenizer")
-flow_path = snapshot_download(repo_id="THUDM/glm-4-voice-decoder")
+audio_tokenizer_path = "/data/models/THUDM/glm-4-voice-tokenizer"
+flow_path = "/data/models/THUDM/glm-4-voice-decoder"
 
 audio_tokenizer_rank = 0
 audio_tokenizer_type = "glm4voice"
@@ -66,7 +66,7 @@ audio_tokenizer_type = "sensevoice_glm4voice"
 prompt_audio_path = None
 
 
-torch_dtype = torch.bfloat16
+torch_dtype = torch.float32
 
 audio_tokenizer = get_audio_tokenizer(
     audio_tokenizer_path,
@@ -107,7 +107,6 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True,
     device_map=device_map,
     torch_dtype=torch_dtype,
-    attn_implementation="flash_attention_2",
 ).eval()
 
 

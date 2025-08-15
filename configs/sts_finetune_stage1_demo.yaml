@@ -1,0 +1,8 @@
+xlsx_sample_num: 5
+
+dataset:
+
+  demo:
+    ratio: 1.0
+    data_paths:
+      - datasets/jsonl/demo/train.jsonl

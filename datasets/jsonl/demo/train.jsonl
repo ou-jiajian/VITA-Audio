@@ -1,0 +1,7 @@
+{"messages": [{"role": "user", "content": "<audio>asset/介绍一下上海.wav</audio>请识别这段音频的内容。"}, {"role": "assistant", "content": "介绍一下上海"}]}
+{"messages": [{"role": "user", "content": "<audio>asset/他本是我莲花池里养大的金鱼.wav</audio>请识别这段音频的内容。"}, {"role": "assistant", "content": "他本是我莲花池里养大的金鱼"}]}
+{"messages": [{"role": "user", "content": "<audio>asset/发表一个悲伤的演讲.wav</audio>请识别这段音频的内容。"}, {"role": "assistant", "content": "发表一个悲伤的演讲"}]}
+{"messages": [{"role": "user", "content": "<audio>asset/发表一个振奋人心的演讲.wav</audio>请识别这段音频的内容。"}, {"role": "assistant", "content": "发表一个振奋人心的演讲"}]}
+{"messages": [{"role": "user", "content": "<audio>asset/2631296891109983590.wav</audio>Please transcribe this audio."}, {"role": "assistant", "content": "This is a sample audio file."}]}
+{"messages": [{"role": "user", "content": "<audio>asset/379838640-d5ff0815-74f8-4738-b0f1-477cfc8dcc2d.wav</audio>Please transcribe this audio."}, {"role": "assistant", "content": "Another sample audio for testing."}]}
+{"messages": [{"role": "user", "content": "<audio>asset/4202818730519913143.wav</audio>Please transcribe this audio."}, {"role": "assistant", "content": "Testing audio file for training."}]}

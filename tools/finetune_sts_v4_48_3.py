@@ -478,16 +478,21 @@ def main():
                 pass
 
     if model_args.audio_model_freeze:
-        logger.info(f"=> Loading audio model weight...")
-        from funasr.train_utils.load_pretrained_model import load_pretrained_model
-        load_pretrained_model(
-            model=model.model.audio_model.model,
-            path="/data/models/FunAudioLLM/SenseVoiceSmall/model.pt",
-            ignore_init_mismatch=True,
-            oss_bucket=None,
-            scope_map=[],
-            excludes=None,
-        )
+        sensevoice_path = os.environ.get("SENSEVOICE_SMALL_PATH", "/data/models/FunAudioLLM/SenseVoiceSmall/model.pt")
+        if os.path.exists(sensevoice_path):
+            logger.info(f"=> Loading audio model weight from {sensevoice_path}...")
+            from funasr.train_utils.load_pretrained_model import load_pretrained_model
+            load_pretrained_model(
+                model=model.model.audio_model.model,
+                path=sensevoice_path,
+                ignore_init_mismatch=True,
+                oss_bucket=None,
+                scope_map=[],
+                excludes=None,
+            )
+        else:
+            logger.warning(f"=> SenseVoice model not found at {sensevoice_path}, skipping weight loading but keeping freeze.")
+        
         model.model.audio_model.requires_grad_(False)
         for name, param in model.named_parameters():
             if ".audio_model." in name:
@@ -659,7 +664,15 @@ def main():
                 logits = logits[0]
             return logits.argmax(dim=-1)
 
-        metric = evaluate.load("accuracy", cache_dir=model_args.cache_dir)
+        try:
+            metric = evaluate.load("accuracy", cache_dir=model_args.cache_dir)
+        except Exception as e:
+            logger.warning(f"Failed to load evaluate metric: {e}, using fallback")
+            import sklearn.metrics
+            class FallbackMetric:
+                def compute(self, predictions, references):
+                    return {"accuracy": sklearn.metrics.accuracy_score(references, predictions)}
+            metric = FallbackMetric()
 
         def compute_metrics(eval_preds):
             preds, labels = eval_preds

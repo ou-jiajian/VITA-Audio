@@ -24,9 +24,9 @@ logger.setLevel(logging.INFO)
 
 torch.manual_seed(1234)
 
-device_map = "cuda:0"
+device_map = "auto"
 audio_tokenizer_rank = 0
-torch_dtype = torch.float16
+torch_dtype = torch.float32
 
 # model_name_or_path = sys.argv[1]
 # audio_tokenizer_path = sys.argv[2]
@@ -45,7 +45,7 @@ if True:
 
     audio_tokenizer_type = "sensevoice_glm4voice"
 
-    model_name_or_path = "VITA-MLLM/VITA-Audio-Plus-Vanilla"
+    model_name_or_path = "/data/models/VITA-MLLM/VITA-Audio-Plus-Vanilla"
 
 # if True:
 if False:
